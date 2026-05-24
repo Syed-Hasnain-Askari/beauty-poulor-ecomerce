@@ -41,7 +41,7 @@ export default function Cart() {
         <div className="bg-primary/10 p-2 rounded-full">
           <Gift size={20} className="fill-primary" />
         </div>
-        <p className="text-sm font-semibold tracking-tight">You've unlocked a Deluxe Mini Serum!</p>
+        <p className="text-sm font-semibold tracking-tight">You&apos;ve unlocked a Deluxe Mini Serum!</p>
       </motion.div>
 
       {/* Items List */}

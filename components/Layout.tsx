@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { Menu, Search, ShoppingBag, Camera, X, Heart, User, Instagram, Youtube, Pin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -224,9 +223,13 @@ export function Footer() {
   );
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = router.pathname;
+export default function Layout({
+  children,
+  pathname,
+}: {
+  children: React.ReactNode;
+  pathname: string;
+}) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   return (

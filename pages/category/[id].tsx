@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import ProductCard from '../../components/ProductCard';
@@ -49,13 +49,13 @@ const BRANDS = Array.from(new Set(PRODUCTS.map(p => p.brand)));
 export default function Category() {
   const router = useRouter();
   const { id } = router.query;
-  const [categoryName, setCategoryName] = useState('Skincare');
-
-  useEffect(() => {
-    if (router.isReady && id) {
-      const idStr = Array.isArray(id) ? id[0] : id;
-      setCategoryName(idStr.charAt(0).toUpperCase() + idStr.slice(1));
+  const categoryName = useMemo(() => {
+    if (!router.isReady || !id) {
+      return 'Skincare';
     }
+
+    const idStr = Array.isArray(id) ? id[0] : id;
+    return idStr.charAt(0).toUpperCase() + idStr.slice(1);
   }, [router.isReady, id]);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);

@@ -163,7 +163,7 @@ export default function ProductDetail() {
                   {[...Array(review.rating)].map((_, i) => <Star key={i} size={14} className="fill-secondary" />)}
                 </div>
               </div>
-              <p className="text-sm text-on-surface leading-snug">"{review.text}"</p>
+              <p className="text-sm text-on-surface leading-snug">&ldquo;{review.text}&rdquo;</p>
             </div>
           ))}
         </div>
