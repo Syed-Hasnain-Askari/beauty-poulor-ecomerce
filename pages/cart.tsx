@@ -1,52 +1,38 @@
 import Link from 'next/link';
 import { X, Minus, Plus, Info, ArrowRight, Gift } from 'lucide-react';
 import { motion } from 'motion/react';
-
-const ITEMS = [
-  {
-    id: 1,
-    name: 'Radiance Silk Foundation',
-    shade: 'Rose Glow',
-    price: 58.00,
-    quantity: 1,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBRgcq6OjDez3v7wQkccESYf2pyEn6-DgfxjtZ0mE15Nb0hM16hr4eDltIbCZLU_FtgjgaWEA0-kdBKk4Ih1isODHvC-dlmbAoav_h0Z0tnzEi-Ei694SJy2bvojbEwQen9I3xt5e7nGUS3QHJCi2VdaMsrD5qysDk3m8Z5A_JQCxji73SgTKNDig9kx8Y9i8j_c9LBoMSy-dEZVinjt_6ZQMXp9mtUsdDjfiKlGotF0DCb6fL8xEChfYKUgvl9F7owVPjM8kqLOlg'
-  },
-  {
-    id: 2,
-    name: 'Velvet Lip & Cheek',
-    shade: 'Petal',
-    price: 34.00,
-    quantity: 1,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCGJr3or0PLfn2p2FokwXPQ6JM_Pxm7AkjZD3_XVPHf1HxRwcEZh35LKhLFQrdmJZG6iMfZJIK0ZNPDOW0nTflFur70dcMln36876jeXQSh-XwcJoPf5I0e-FBuKNEVt2OhinyTHvrxDwuYB7XuWDUxPoVdbk-u3kpoLuhMYFJHLJLe3sMUYdJikruemOfcA-ARx0tuqtUxyTtd4s_YLfVxC_3bDBP9A6l0Tmx52sXblEvh4i_ctsi-H2gH85k375m2NKevKOXA-JY'
-  }
-];
+import { useCart } from '../lib/cart-context';
 
 export default function Cart() {
-  const subtotal = ITEMS.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const { items, subtotal, removeFromCart, updateQuantity, itemCount } = useCart();
+  const freeShippingUnlocked = subtotal >= 75;
+  const shippingProgress = Math.min((subtotal / 75) * 100, 100);
 
   return (
     <div className="px-margin-mobile py-stack-lg max-w-2xl mx-auto pb-48">
       {/* Header */}
       <div className="mb-stack-md flex justify-between items-baseline">
         <h2 className="font-serif text-3xl">Your Bag</h2>
-        <span className="text-sm text-on-surface-variant">({ITEMS.length} Items)</span>
+        <span className="text-sm text-on-surface-variant">({itemCount} Items)</span>
       </div>
 
       {/* Gift Callout */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="mb-stack-md p-4 bg-primary/10 text-primary rounded-2xl flex items-center gap-4 border border-primary/20 shadow-sm"
-      >
-        <div className="bg-primary/10 p-2 rounded-full">
-          <Gift size={20} className="fill-primary" />
-        </div>
-        <p className="text-sm font-semibold tracking-tight">You've unlocked a Deluxe Mini Serum!</p>
-      </motion.div>
+      {freeShippingUnlocked && (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-stack-md p-4 bg-primary/10 text-primary rounded-2xl flex items-center gap-4 border border-primary/20 shadow-sm"
+        >
+          <div className="bg-primary/10 p-2 rounded-full">
+            <Gift size={20} className="fill-primary" />
+          </div>
+          <p className="text-sm font-semibold tracking-tight">You've unlocked free shipping on this order.</p>
+        </motion.div>
+      )}
 
       {/* Items List */}
       <div className="space-y-stack-md">
-        {ITEMS.map((item) => (
+        {items.map((item) => (
           <div key={item.id} className="bg-white p-4 rounded-2xl flex gap-4 shadow-sm border border-outline-variant/20">
             <div className="w-24 h-32 flex-shrink-0 rounded-xl overflow-hidden bg-surface-variant/30">
               <img className="w-full h-full object-cover" src={item.image} alt={item.name} />
@@ -55,23 +41,31 @@ export default function Cart() {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-serif text-lg text-on-surface">{item.name}</h3>
-                  <p className="text-xs text-on-surface-variant">Shade: <span className="font-semibold text-primary">{item.shade}</span></p>
+                  <p className="text-xs text-on-surface-variant">Category: <span className="font-semibold text-primary">{item.categoryName || 'Beauty Essentials'}</span></p>
                 </div>
-                <button className="text-on-surface-variant hover:text-error transition-colors">
+                <button onClick={() => removeFromCart(item.id)} className="text-on-surface-variant hover:text-error transition-colors">
                   <X size={20} />
                 </button>
               </div>
               <div className="flex justify-between items-center mt-4">
                 <div className="flex items-center border border-outline-variant rounded-full px-2 py-1">
-                  <button className="p-1 hover:text-primary"><Minus size={14} /></button>
+                  <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-1 hover:text-primary"><Minus size={14} /></button>
                   <span className="px-3 text-sm font-semibold">{item.quantity}</span>
-                  <button className="p-1 hover:text-primary"><Plus size={14} /></button>
+                  <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-1 hover:text-primary"><Plus size={14} /></button>
                 </div>
-                <span className="font-serif text-lg text-primary">${item.price.toFixed(2)}</span>
+                <span className="font-serif text-lg text-primary">${(item.price * item.quantity).toFixed(2)}</span>
               </div>
             </div>
           </div>
         ))}
+        {items.length === 0 && (
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant/20 text-center">
+            <p className="text-on-surface-variant">Your cart is empty.</p>
+            <Link href="/category/all" className="inline-flex mt-4 text-primary font-semibold">
+              Continue shopping
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Summary */}
@@ -109,11 +103,11 @@ export default function Cart() {
         {/* Shipping Progress */}
         <div className="p-4 bg-surface-variant/5 rounded-2xl border border-outline-variant/20">
           <div className="flex justify-between mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest">Free Shipping Unlocked!</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">{freeShippingUnlocked ? 'Free Shipping Unlocked!' : 'Free Shipping Progress'}</span>
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Over $75.00</span>
           </div>
           <div className="h-1.5 w-full bg-outline-variant/20 rounded-full overflow-hidden">
-            <div className="h-full bg-primary w-full"></div>
+            <div className="h-full bg-primary" style={{ width: `${shippingProgress}%` }}></div>
           </div>
         </div>
       </section>
@@ -123,7 +117,7 @@ export default function Cart() {
         <div className="max-w-7xl mx-auto">
           <Link 
             href="/checkout" 
-            className="w-full bg-primary text-white font-serif py-5 rounded-full text-lg font-semibold tracking-wide shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 active:scale-95"
+            className={`w-full font-serif py-5 rounded-full text-lg font-semibold tracking-wide shadow-lg transition-all flex items-center justify-center gap-2 ${items.length === 0 ? 'bg-outline-variant/40 text-white/80 pointer-events-none' : 'bg-primary text-white hover:opacity-90 active:scale-95'}`}
           >
             Proceed to Checkout
             <ArrowRight size={20} />
