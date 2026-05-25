@@ -1,23 +1,9 @@
+"use client";
+
 import { useMemo, useState } from "react";
-import type { GetServerSideProps } from "next";
-import ProductCard from "../../components/ProductCard";
+import ProductCard from "@/components/ProductCard";
 import { SlidersHorizontal, Star, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { getCategories as getProductsByCategory } from "@/lib/action/productAction";
-
-type ApiProduct = {
-	_id: string;
-	name: string;
-	price: number;
-	rating?: number;
-	reviews?: unknown[];
-	images?: string[];
-	category?: {
-		_id?: string;
-		name?: string;
-		slug?: string;
-	};
-};
 
 type CategoryPageProduct = {
 	id: string;
@@ -34,7 +20,7 @@ type CategoryPageProps = {
 	products: CategoryPageProduct[];
 };
 
-export default function Category({
+export default function CategoryClient({
 	categoryName,
 	products
 }: CategoryPageProps) {
@@ -143,7 +129,7 @@ export default function Category({
 				</div>
 			</section>
 
-			<section className="grid grid-cols-2 md:grid-cols-4 gap-gutter mt-stack-md">
+			<section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mt-stack-md">
 				<AnimatePresence>
 					{filteredProducts.map((product) => (
 						<ProductCard key={product.id} product={product} />
@@ -302,41 +288,3 @@ export default function Category({
 		</div>
 	);
 }
-
-export const getServerSideProps: GetServerSideProps<CategoryPageProps> = async (
-	context
-) => {
-	const rawSlug = context.params?.id;
-	const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
-
-	if (!slug) {
-		return {
-			notFound: true
-		};
-	}
-
-	const response =
-		slug === "all"
-			? await getProductsByCategory("")
-			: await getProductsByCategory(slug);
-	const apiProducts: ApiProduct[] = response?.result || [];
-	const fallbackName = slug
-		.split("-")
-		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-		.join(" ");
-
-	return {
-		props: {
-			categoryName: apiProducts[0]?.category?.name || fallbackName,
-			products: apiProducts.map((product) => ({
-				id: product._id,
-				brand: product.category?.name || "Beauty Edit",
-				name: product.name,
-				price: product.price,
-				rating: product.rating || 0,
-				reviews: Array.isArray(product.reviews) ? product.reviews.length : 0,
-				image: product.images?.[0] || "/images/banner-image.jpg"
-			}))
-		}
-	};
-};

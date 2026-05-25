@@ -1,9 +1,17 @@
+"use client";
+
 import { useState } from "react";
-import type { GetServerSideProps } from "next";
-import { Star, Minus, Plus, ChevronDown, ArrowRight, Heart } from "lucide-react";
+import {
+	Star,
+	Minus,
+	Plus,
+	ChevronDown,
+	ArrowRight,
+	Heart
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { getProductById } from "@/lib/action/productAction";
 import { useCart } from "@/lib/cart-context";
+import Image from "next/image";
 
 const REVIEWS = [
 	{
@@ -20,22 +28,6 @@ const REVIEWS = [
 	}
 ];
 
-type ApiProduct = {
-	_id: string;
-	name: string;
-	description?: string;
-	price: number;
-	category?: {
-		_id?: string;
-		name?: string;
-	};
-	images?: string[];
-	stock?: number;
-	sku?: string;
-	rating?: number;
-	reviews?: unknown[];
-};
-
 type ProductDetailProps = {
 	product: {
 		id: string;
@@ -51,7 +43,7 @@ type ProductDetailProps = {
 	};
 };
 
-export default function ProductDetail({ product }: ProductDetailProps) {
+export default function ProductClient({ product }: ProductDetailProps) {
 	const [quantity, setQuantity] = useState(1);
 	const [activeTab, setActiveTab] = useState<string | null>("description");
 	const [isAdded, setIsAdded] = useState(false);
@@ -63,7 +55,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 				const exactMatches =
 					star === roundedRating ? Math.max(reviewCount - (5 - star), 1) : 0;
 				return Math.round((exactMatches / reviewCount) * 100);
-		  })
+			})
 		: [0, 0, 0, 0, 0];
 
 	const handleAddToCart = () => {
@@ -93,12 +85,15 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 						{product.images.map((img, idx) => (
 							<div
 								key={idx}
-								className="flex-shrink-0 w-full aspect-[4/5] snap-start"
+								className="flex-shrink-0 w-full aspect-square snap-start"
 							>
-								<img
+								<Image
 									alt={`${product.name} ${idx + 1}`}
-									className="w-full h-full object-cover"
 									src={img}
+									loading="eager"
+									width={600}
+									height={600}
+									className="object-cover w-full h-full"
 								/>
 							</div>
 						))}
@@ -155,7 +150,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 							<label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-3">
 								Quantity
 							</label>
-							<div className="flex items-center border border-outline rounded-full px-4 py-2 w-32 justify-between">
+							<div className="flex items-center border border-outline rounded-full px-4 py-2 w-40 justify-between">
 								<button
 									onClick={() => setQuantity(Math.max(1, quantity - 1))}
 									className="text-on-surface-variant"
@@ -165,7 +160,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 								<span className="text-sm font-semibold">{quantity}</span>
 								<button
 									onClick={() =>
-										setQuantity(Math.min(product.stock || quantity + 1, quantity + 1))
+										setQuantity(
+											Math.min(product.stock || quantity + 1, quantity + 1)
+										)
 									}
 									className="text-on-surface-variant"
 									disabled={product.stock === 0}
@@ -332,47 +329,3 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 		</div>
 	);
 }
-
-export const getServerSideProps: GetServerSideProps<ProductDetailProps> = async (
-	context
-) => {
-	const rawId = context.params?.id;
-	const id = Array.isArray(rawId) ? rawId[0] : rawId;
-
-	if (!id) {
-		return {
-			notFound: true
-		};
-	}
-
-	const response = await getProductById(id);
-	const apiProduct: ApiProduct | null = response?.result || null;
-
-	if (!response?.success || !apiProduct) {
-		return {
-			notFound: true
-		};
-	}
-
-	return {
-		props: {
-			product: {
-				id: apiProduct._id,
-				name: apiProduct.name,
-				description: apiProduct.description || "No description available.",
-				price: apiProduct.price,
-				categoryName: apiProduct.category?.name || "Beauty Essentials",
-				images:
-					apiProduct.images?.length
-						? apiProduct.images
-						: ["/images/banner-image.jpg"],
-				stock: apiProduct.stock || 0,
-				sku: apiProduct.sku || "N/A",
-				rating: apiProduct.rating || 0,
-				reviewCount: Array.isArray(apiProduct.reviews)
-					? apiProduct.reviews.length
-					: 0
-			}
-		}
-	};
-};

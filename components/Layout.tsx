@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import {
 	Menu,
 	Search,
@@ -47,7 +47,7 @@ export function Sidebar({
 		{ name: "Best Sellers", path: "/" },
 		...dynamicCategories
 	];
-	console.log(categories, "categories");
+
 	useEffect(() => {
 		let isMounted = true;
 
@@ -61,7 +61,7 @@ export function Sidebar({
 			const mappedCategories = Array.isArray(response.result)
 				? response.result
 						.map((category: CategoryResponseItem) => {
-							const name = category?.name || category?.name;
+							const name = category?.name;
 							const path = category?.slug;
 
 							if (!name || !path) {
@@ -77,7 +77,7 @@ export function Sidebar({
 							Boolean(category)
 						)
 						.filter(
-							(category: SidebarCategory, index: number, array: []) =>
+							(category: SidebarCategory, index: number, array: SidebarCategory[]) =>
 								array.findIndex((item) => item.path === category.path) === index
 						)
 				: [];
@@ -387,9 +387,15 @@ export function Footer() {
 	);
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-	const router = useRouter();
-	const pathname = router.pathname;
+export default function Layout({ 
+	children,
+	pathname: propPathname
+}: { 
+	children: React.ReactNode;
+	pathname?: string;
+}) {
+	const pathnameFromNavigation = usePathname();
+	const pathname = propPathname || pathnameFromNavigation || "/";
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
 	return (

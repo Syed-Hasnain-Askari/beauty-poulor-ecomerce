@@ -4,6 +4,7 @@ import { ChevronDown, Info, PackageCheck, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { createOrder } from "@/lib/action/orderAction";
+import Image from "next/image";
 
 type CheckoutForm = {
 	firstName: string;
@@ -61,7 +62,8 @@ export default function Checkout() {
 
 		const shippingFilled =
 			form.street && form.city && form.state && form.zipCode && form.country;
-		const contactFilled = form.firstName && form.lastName && form.email && form.phone;
+		const contactFilled =
+			form.firstName && form.lastName && form.email && form.phone;
 
 		if (shippingFilled && contactFilled) {
 			return 3;
@@ -74,7 +76,9 @@ export default function Checkout() {
 		return 1;
 	}, [form, orderSuccess]);
 
-	const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+	const handleChange = (
+		event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+	) => {
 		const { name, value } = event.target;
 		setForm((current) => ({
 			...current,
@@ -183,9 +187,7 @@ export default function Checkout() {
 					>
 						<span
 							className={`text-[10px] font-bold uppercase tracking-widest ${
-								step === section.id
-									? "text-primary"
-									: "text-on-surface-variant"
+								step === section.id ? "text-primary" : "text-on-surface-variant"
 							}`}
 						>
 							{section.label}
@@ -393,10 +395,13 @@ export default function Checkout() {
 									key={item.id}
 									className="w-12 h-12 rounded-lg border-2 border-white overflow-hidden relative shadow-md"
 								>
-									<img
+									<Image
 										src={item.image}
 										className="w-full h-full object-cover"
 										alt={item.name}
+										loading="eager"
+										width={48}
+										height={48}
 									/>
 									<span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
 										{item.quantity}
@@ -469,7 +474,11 @@ export default function Checkout() {
 						{showDetails ? "Hide details" : "Show details"}
 						<ChevronDown
 							size={14}
-							className={showDetails ? "rotate-180 transition-transform" : "transition-transform"}
+							className={
+								showDetails
+									? "rotate-180 transition-transform"
+									: "transition-transform"
+							}
 						/>
 					</button>
 				</div>

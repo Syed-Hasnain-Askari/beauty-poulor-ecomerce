@@ -1,4 +1,4 @@
-export const handleResponse = async (response) => {
+export const handleResponse = async (response: Response) => {
 	if (!response.ok) {
 		const errorText = await response.text();
 		console.error(`API Error (${response.status}):`, errorText);

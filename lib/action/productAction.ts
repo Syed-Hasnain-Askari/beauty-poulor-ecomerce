@@ -28,7 +28,7 @@ export async function getCategories(slug?: string) {
 	}
 }
 
-export async function getProductById(id) {
+export async function getProductById(id: string) {
 	try {
 		const response = await fetch(`${BASE_URL}/api/products/${id}`, {
 			headers: {
@@ -39,7 +39,7 @@ export async function getProductById(id) {
 		});
 
 		return await handleResponse(response);
-	} catch (error) {
+	} catch (error: any) {
 		console.error("getProductById failed:", error);
 		return { success: false, message: error.message, result: null };
 	}
