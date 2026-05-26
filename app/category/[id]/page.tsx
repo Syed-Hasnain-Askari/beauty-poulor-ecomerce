@@ -2,6 +2,9 @@ import { getCategories as getProductsByCategory } from "@/lib/action/productActi
 import CategoryClient from "./CategoryClient";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type Props = {
 	params: Promise<{ id: string }>;
 };

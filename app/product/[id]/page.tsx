@@ -3,6 +3,9 @@ import { getProductById } from "@/lib/action/productAction";
 import ProductClient from "./ProductClient";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type Props = {
 	params: Promise<{ id: string }>;
 };

@@ -1,6 +1,9 @@
 import { handleResponse } from "@/utils";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const BASE_URL =
+	typeof window === "undefined"
+		? process.env.NEXT_PUBLIC_API_BASE_URL || ""
+		: "";
 
 export async function getCategories(slug?: string) {
 	try {

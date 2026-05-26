@@ -23,10 +23,11 @@ export default function ProductCard({ product }: { product: Product }) {
 			whileHover={{ y: -5 }}
 			className="flex h-full flex-col group w-full"
 		>
-			<div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-stack-sm shadow-sm bg-surface-variant/20">
+			<div className="relative aspect-[3/4] rounded-3xl overflow-hidden mb-4 shadow-sm bg-surface-variant/20">
 				<Link
 					href={`/product/${product.id}`}
 					className="block w-full h-full relative"
+					prefetch={false}
 				>
 					<Image
 						alt={product.name}
@@ -43,24 +44,24 @@ export default function ProductCard({ product }: { product: Product }) {
 
 			<div className="px-1 flex flex-col justify-between grow">
 				<div>
-					<p className="text-[10px] text-secondary font-bold tracking-widest uppercase">
+					<p className="text-[10px] text-gold font-bold tracking-widest uppercase mb-1">
 						{product.brand}
 					</p>
-					<h3 className="font-serif text-base text-on-surface font-medium truncate mt-0.5">
+					<h3 className="font-serif text-lg text-on-surface leading-tight mb-1">
 						{product.name}
 					</h3>
-					<div className="flex items-center gap-1 mt-1">
-						<Star size={12} className="fill-secondary text-secondary" />
+					<div className="flex items-center gap-1 mb-2">
+						<Star size={12} className="fill-gold text-gold" />
 						<span className="text-[10px] font-semibold text-on-surface-variant">
 							{product.rating} ({product.reviews})
 						</span>
 					</div>
 				</div>
-				<div className="flex items-center justify-between mt-stack-sm">
-					<span className="font-serif text-xl text-on-surface">
-						${product.price}.00
+				<div className="flex items-center justify-between mt-auto pt-2">
+					<span className="font-serif text-xl text-on-surface font-medium">
+						${product.price.toFixed(2)}
 					</span>
-					<button className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white shadow-sm hover:scale-110 active:scale-90 transition-all">
+					<button className="w-10 h-10 flex items-center justify-center rounded-full bg-deep-rose text-white shadow-lg shadow-deep-rose/20 hover:scale-110 active:scale-90 transition-all">
 						<ShoppingCart size={18} />
 					</button>
 				</div>

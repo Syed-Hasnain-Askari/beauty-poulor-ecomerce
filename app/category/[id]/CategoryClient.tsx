@@ -129,25 +129,39 @@ export default function CategoryClient({
 				</div>
 			</section>
 
-			<section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mt-stack-md">
-				<AnimatePresence>
-					{filteredProducts.map((product) => (
-						<ProductCard key={product.id} product={product} />
-					))}
-				</AnimatePresence>
-				{filteredProducts.length === 0 && (
-					<div className="col-span-full py-20 text-center">
-						<p className="text-on-surface-variant">
-							No products match your filters.
-						</p>
-						<button
-							onClick={clearFilters}
-							className="mt-4 text-primary font-bold uppercase tracking-widest text-xs underline"
-						>
-							Clear All
-						</button>
+			<section className="py-section-gap bg-white/50 mt-stack-md">
+				<div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
+					<div className="flex items-center justify-between mb-8 gap-4">
+						<h2 className="font-serif text-4xl md:text-5xl text-on-surface tracking-tight">
+							{categoryName}
+						</h2>
+						<div className="text-sm text-on-surface-variant">
+							{filteredProducts.length} Products
+						</div>
 					</div>
-				)}
+
+					<div className="flex overflow-x-auto no-scrollbar gap-8 pb-8 snap-x">
+						{filteredProducts.map((product) => (
+							<div key={product.id} className="snap-start flex-shrink-0 w-72">
+								<ProductCard product={product} />
+							</div>
+						))}
+					</div>
+
+					{filteredProducts.length === 0 && (
+						<div className="py-20 text-center">
+							<p className="text-on-surface-variant">
+								No products match your filters.
+							</p>
+							<button
+								onClick={clearFilters}
+								className="mt-4 text-primary font-bold uppercase tracking-widest text-xs underline"
+							>
+								Clear All
+							</button>
+						</div>
+					)}
+				</div>
 			</section>
 
 			<AnimatePresence>

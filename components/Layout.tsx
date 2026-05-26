@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
 	Menu,
 	Search,
@@ -15,7 +15,7 @@ import {
 	Pin
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { getCategories } from "../lib/action/categoryAction";
+import { getCategories } from "@/lib/action/categoryAction";
 import { useCart } from "../lib/cart-context";
 
 type SidebarCategory = {
@@ -38,15 +38,24 @@ export function Sidebar({
 	isOpen: boolean;
 	onClose: () => void;
 }) {
+	const router = useRouter();
 	const [dynamicCategories, setDynamicCategories] = useState<SidebarCategory[]>(
 		[]
 	);
+
+	const navigateToCategory = async (path: string) => {
+		onClose();
+		await router.push(path);
+	};
 
 	const categories = [
 		{ name: "All Products", path: "/category/all" },
 		{ name: "Best Sellers", path: "/" },
 		...dynamicCategories
-	];
+	].filter(
+		(category, index, array) =>
+			array.findIndex((item) => item.path === category.path) === index
+	);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -77,7 +86,11 @@ export function Sidebar({
 							Boolean(category)
 						)
 						.filter(
-							(category: SidebarCategory, index: number, array: SidebarCategory[]) =>
+							(
+								category: SidebarCategory,
+								index: number,
+								array: SidebarCategory[]
+							) =>
 								array.findIndex((item) => item.path === category.path) === index
 						)
 				: [];
@@ -126,10 +139,10 @@ export function Sidebar({
 							<ul className="flex flex-col gap-6">
 								{categories?.map((cat) => (
 									<li key={cat.name}>
-										<Link
-											href={cat.path}
-											onClick={onClose}
-											className="text-lg font-serif text-matte-black hover:text-deep-rose transition-colors flex items-center justify-between group"
+										<button
+											type="button"
+											onClick={() => navigateToCategory(cat.path)}
+											className="w-full text-left text-lg font-serif text-matte-black hover:text-deep-rose transition-colors flex items-center justify-between group"
 										>
 											{cat.name}
 											<motion.span
@@ -139,11 +152,10 @@ export function Sidebar({
 											>
 												→
 											</motion.span>
-										</Link>
+										</button>{" "}
 									</li>
 								))}
 							</ul>
-
 							<div className="mt-12 pt-12 border-t border-outline-variant/30 flex flex-col gap-4">
 								<Link
 									href="/contact"
@@ -387,10 +399,10 @@ export function Footer() {
 	);
 }
 
-export default function Layout({ 
+export default function Layout({
 	children,
 	pathname: propPathname
-}: { 
+}: {
 	children: React.ReactNode;
 	pathname?: string;
 }) {

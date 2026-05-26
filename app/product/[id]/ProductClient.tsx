@@ -10,7 +10,7 @@ import {
 	Heart
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useCart } from "@/lib/cart-context";
+import { useCart } from "../../../lib/cart-context";
 import Image from "next/image";
 
 const REVIEWS = [
@@ -50,13 +50,6 @@ export default function ProductClient({ product }: ProductDetailProps) {
 	const { addToCart } = useCart();
 	const roundedRating = Math.max(0, Math.min(5, Math.round(product.rating)));
 	const reviewCount = product.reviewCount || REVIEWS.length;
-	const ratingDistribution = reviewCount
-		? [5, 4, 3, 2, 1].map((star) => {
-				const exactMatches =
-					star === roundedRating ? Math.max(reviewCount - (5 - star), 1) : 0;
-				return Math.round((exactMatches / reviewCount) * 100);
-			})
-		: [0, 0, 0, 0, 0];
 
 	const handleAddToCart = () => {
 		if (product.stock === 0) {
@@ -80,6 +73,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 	return (
 		<div className="pb-32 w-full max-w-7xl mx-auto">
 			<div className="flex flex-col lg:flex-row gap-stack-lg">
+				{/* Gallery */}
 				<section className="lg:w-1/2 relative bg-surface-variant/20">
 					<div className="overflow-x-auto snap-x snap-mandatory flex no-scrollbar">
 						{product.images.map((img, idx) => (
@@ -93,7 +87,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 									loading="eager"
 									width={600}
 									height={600}
-									className="object-cover w-full h-full"
+									className="w-full h-full object-cover"
 								/>
 							</div>
 						))}
@@ -105,11 +99,12 @@ export default function ProductClient({ product }: ProductDetailProps) {
 								className={`w-2 h-2 rounded-full ${
 									idx === 0 ? "bg-primary" : "bg-outline-variant"
 								}`}
-							/>
+							></span>
 						))}
 					</div>
 				</section>
 
+				{/* Info */}
 				<section className="lg:w-1/2 px-margin-mobile lg:py-stack-lg flex flex-col">
 					<div className="flex flex-col gap-1">
 						<div className="flex items-center gap-1">
@@ -135,18 +130,10 @@ export default function ProductClient({ product }: ProductDetailProps) {
 						<p className="font-serif text-2xl font-semibold text-primary mt-2">
 							${product.price.toFixed(2)}
 						</p>
-						<div className="flex flex-wrap items-center gap-3 mt-3 text-xs font-semibold text-on-surface-variant">
-							<span>SKU: {product.sku}</span>
-							<span>
-								{product.stock > 0
-									? `${product.stock} in stock`
-									: "Currently out of stock"}
-							</span>
-						</div>
 					</div>
 
-					<div className="mt-8 flex flex-col gap-6">
-						<div>
+					<div className="mt-8 flex flex-col">
+						<div className="mt-4">
 							<label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-3">
 								Quantity
 							</label>
@@ -171,13 +158,14 @@ export default function ProductClient({ product }: ProductDetailProps) {
 								</button>
 							</div>
 							{product.stock > 0 && (
-								<p className="mt-3 text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant">
-									Selected: {quantity}
+								<p className="mt-3 text-xs font-bold  uppercase tracking-widest text-on-surface-variant">
+									Selected: {quantity} ({product.stock} in stock)
 								</p>
 							)}
 						</div>
 					</div>
 
+					{/* Accordion */}
 					<div className="mt-12 flex flex-col divide-y divide-outline-variant/30">
 						{[
 							{
@@ -194,7 +182,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 								id: "shipping",
 								title: "Shipping",
 								content:
-									"Orders are processed quickly and packed with care so your beauty essentials arrive ready to use."
+									"Orders are processed quickly and packed with care so your beauty essentials arrive ready to use. Free shipping over $75."
 							}
 						].map((section) => (
 							<div key={section.id} className="py-4">
@@ -232,6 +220,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 				</section>
 			</div>
 
+			{/* Reviews */}
 			<section className="mt-16 px-margin-mobile">
 				<h3 className="font-serif text-2xl mb-6">Customer Reviews</h3>
 				<div className="bg-surface-variant/10 rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-8">
@@ -256,7 +245,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 					</div>
 
 					<div className="flex-1 flex flex-col gap-2">
-						{ratingDistribution.map((percent, i) => (
+						{[85, 10, 3, 1, 1].map((p, i) => (
 							<div key={i} className="flex items-center gap-3">
 								<span className="text-[10px] font-bold text-on-surface-variant w-4">
 									{5 - i}
@@ -264,11 +253,11 @@ export default function ProductClient({ product }: ProductDetailProps) {
 								<div className="flex-1 h-1.5 bg-outline-variant/30 rounded-full overflow-hidden">
 									<div
 										className="h-full bg-primary"
-										style={{ width: `${percent}%` }}
-									/>
+										style={{ width: `${p}%` }}
+									></div>
 								</div>
 								<span className="text-[10px] font-bold text-on-surface-variant w-8">
-									{percent}%
+									{p}%
 								</span>
 							</div>
 						))}
@@ -297,7 +286,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 								</div>
 							</div>
 							<p className="text-sm text-on-surface leading-snug">
-								"{review.text}"
+								&ldquo;{review.text}&rdquo;
 							</p>
 						</div>
 					))}
@@ -308,6 +297,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 				</button>
 			</section>
 
+			{/* Sticky Bottom Bar */}
 			<div className="fixed bottom-0 left-0 w-full p-4 bg-white/80 backdrop-blur-lg border-t border-outline-variant/30 z-[60]">
 				<div className="flex gap-3 max-w-7xl mx-auto">
 					<button className="w-14 h-14 border border-outline rounded-2xl flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
@@ -321,7 +311,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 						{product.stock > 0
 							? isAdded
 								? `Added ${quantity} to Cart`
-								: `Add to Cart - $${product.price.toFixed(2)}`
+								: `Add to Cart — $${product.price.toFixed(2)}`
 							: "Out of Stock"}
 					</button>
 				</div>
