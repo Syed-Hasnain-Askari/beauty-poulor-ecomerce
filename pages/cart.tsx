@@ -31,7 +31,7 @@ export default function Cart() {
 						<Gift size={20} className="fill-primary" />
 					</div>
 					<p className="text-sm font-semibold tracking-tight">
-						You've unlocked free shipping on this order.
+						You&apos;ve unlocked free shipping on this order.
 					</p>
 				</motion.div>
 			)}

@@ -22,7 +22,7 @@ export default function Contact() {
 					animate={{ opacity: 1, x: 0 }}
 					className="font-serif text-5xl md:text-7xl text-primary leading-tight mb-4"
 				>
-					We'd Love to Hear From You
+					We&apos;d Love to Hear From You
 				</motion.h1>
 				<p className="text-lg text-on-surface-variant max-w-lg leading-relaxed">
 					Our concierge team is dedicated to providing you with a seamless and

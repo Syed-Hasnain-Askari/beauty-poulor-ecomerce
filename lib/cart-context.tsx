@@ -3,9 +3,8 @@
 import {
 	createContext,
 	useContext,
-	useEffect,
 	useMemo,
-	useState,
+	useSyncExternalStore,
 	type ReactNode
 } from "react";
 
@@ -35,49 +34,91 @@ type CartContextValue = {
 };
 
 const STORAGE_KEY = "beautypoulor-cart";
+const CART_UPDATED_EVENT = "beautypoulor-cart-updated";
+let cachedCartStorageValue: string | null = null;
+let cachedCartSnapshot: CartItem[] = [];
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
+function readCartFromStorage() {
+	if (typeof window === "undefined") {
+		return cachedCartSnapshot;
+	}
+
+	try {
+		const storedCart = window.localStorage.getItem(STORAGE_KEY);
+		const nextStorageValue = storedCart ?? "";
+
+		if (cachedCartStorageValue === nextStorageValue) {
+			return cachedCartSnapshot;
+		}
+
+		cachedCartStorageValue = nextStorageValue;
+		cachedCartSnapshot = storedCart
+			? (JSON.parse(storedCart) as CartItem[])
+			: [];
+
+		return cachedCartSnapshot;
+	} catch (error) {
+		console.error("Failed to load cart:", error);
+		cachedCartStorageValue = null;
+		cachedCartSnapshot = [];
+		return cachedCartSnapshot;
+	}
+}
+
+function writeCartToStorage(items: CartItem[]) {
+	if (typeof window === "undefined") {
+		return;
+	}
+
+	const serializedItems = JSON.stringify(items);
+	cachedCartStorageValue = serializedItems;
+	cachedCartSnapshot = items;
+	window.localStorage.setItem(STORAGE_KEY, serializedItems);
+	window.dispatchEvent(new Event(CART_UPDATED_EVENT));
+}
+
+function subscribeToCartUpdates(onStoreChange: () => void) {
+	if (typeof window === "undefined") {
+		return () => {};
+	}
+
+	const handleStorage = (event: StorageEvent) => {
+		if (event.key === STORAGE_KEY) {
+			onStoreChange();
+		}
+	};
+
+	const handleCustomEvent = () => {
+		onStoreChange();
+	};
+
+	window.addEventListener("storage", handleStorage);
+	window.addEventListener(CART_UPDATED_EVENT, handleCustomEvent);
+
+	return () => {
+		window.removeEventListener("storage", handleStorage);
+		window.removeEventListener(CART_UPDATED_EVENT, handleCustomEvent);
+	};
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-	const [items, setItems] = useState<CartItem[]>([]);
-	const [hasLoaded, setHasLoaded] = useState(false);
-
-	useEffect(() => {
-		try {
-			const storedCart =
-				typeof window !== "undefined"
-					? window.localStorage.getItem(STORAGE_KEY)
-					: null;
-
-			if (storedCart) {
-				setItems(JSON.parse(storedCart));
-			}
-		} catch (error) {
-			console.error("Failed to load cart:", error);
-		} finally {
-			setHasLoaded(true);
-		}
-	}, []);
-
-	useEffect(() => {
-		if (!hasLoaded || typeof window === "undefined") {
-			return;
-		}
-
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-	}, [hasLoaded, items]);
+	const items = useSyncExternalStore(
+		subscribeToCartUpdates,
+		readCartFromStorage,
+		() => []
+	);
 
 	const value = useMemo<CartContextValue>(() => {
 		const addToCart = (item: AddToCartInput) => {
 			const nextQuantity = Math.max(1, item.quantity || 1);
-
-			setItems((currentItems) => {
-				const existingItem = currentItems.find(
-					(currentItem) => currentItem.id === item.id
-				);
-
-				if (existingItem) {
-					return currentItems.map((currentItem) =>
+			const currentItems = items;
+			const existingItem = currentItems.find(
+				(currentItem) => currentItem.id === item.id
+			);
+			const nextItems = existingItem
+				? currentItems.map((currentItem) =>
 						currentItem.id === item.id
 							? {
 									...currentItem,
@@ -87,28 +128,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 									)
 							  }
 							: currentItem
-					);
-				}
+				  )
+				: [
+						...currentItems,
+						{
+							...item,
+							quantity: Math.min(nextQuantity, item.stock || nextQuantity)
+						}
+				  ];
 
-				return [
-					...currentItems,
-					{
-						...item,
-						quantity: Math.min(nextQuantity, item.stock || nextQuantity)
-					}
-				];
-			});
+			writeCartToStorage(nextItems);
 		};
 
 		const removeFromCart = (id: string) => {
-			setItems((currentItems) =>
-				currentItems.filter((currentItem) => currentItem.id !== id)
+			writeCartToStorage(
+				items.filter((currentItem) => currentItem.id !== id)
 			);
 		};
 
 		const updateQuantity = (id: string, quantity: number) => {
-			setItems((currentItems) =>
-				currentItems
+			writeCartToStorage(
+				items
 					.map((currentItem) => {
 						if (currentItem.id !== id) {
 							return currentItem;
@@ -127,7 +167,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 		};
 
 		const clearCart = () => {
-			setItems([]);
+			writeCartToStorage([]);
 		};
 
 		return {
