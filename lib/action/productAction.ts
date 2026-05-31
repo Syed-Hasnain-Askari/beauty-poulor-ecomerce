@@ -1,17 +1,28 @@
 import { handleResponse } from "@/utils";
 
-const BASE_URL =
-	typeof window === "undefined"
-		? process.env.NEXT_PUBLIC_API_BASE_URL || ""
-		: "";
+const getApiBaseUrl = () => {
+	if (typeof window !== "undefined") {
+		return "";
+	}
+
+	if (process.env.NEXT_PUBLIC_SITE_URL) {
+		return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+	}
+
+	if (process.env.VERCEL_URL) {
+		return `https://${process.env.VERCEL_URL}`;
+	}
+
+	return "http://localhost:3000";
+};
 
 export async function getCategories(slug?: string) {
 	try {
-		const url = slug
-			? `${BASE_URL}/api/products?slug=${slug}`
-			: `${BASE_URL}/api/products`;
+		const baseUrl = getApiBaseUrl();
+		const url = slug ? `/api/products?slug=${slug}` : "/api/products";
+		const finalUrl = baseUrl ? `${baseUrl}${url}` : url;
 
-		const response = await fetch(url, {
+		const response = await fetch(finalUrl, {
 			headers: {
 				"Content-Type": "application/json"
 			},
@@ -33,7 +44,11 @@ export async function getCategories(slug?: string) {
 
 export async function getProductById(id: string) {
 	try {
-		const response = await fetch(`${BASE_URL}/api/products/${id}`, {
+		const baseUrl = getApiBaseUrl();
+		const url = `/api/products/${id}`;
+		const finalUrl = baseUrl ? `${baseUrl}${url}` : url;
+
+		const response = await fetch(finalUrl, {
 			headers: {
 				"Content-Type": "application/json"
 			},
