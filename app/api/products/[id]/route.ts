@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getBackendBaseUrl } from "../../_lib/backend";
 
-type Params = {
-	params: { id: string };
-};
-
-export async function GET(_: Request, { params }: Params) {
+export async function GET(
+	_: NextRequest,
+	{ params }: { params: Promise<{ id: string }> }
+) {
 	const baseUrl = getBackendBaseUrl();
 
 	if (!baseUrl) {
@@ -19,7 +18,7 @@ export async function GET(_: Request, { params }: Params) {
 		);
 	}
 
-	const { id } = params;
+	const { id } = await params;
 	const response = await fetch(`${baseUrl}/api/products/${id}`, {
 		headers: {
 			"Content-Type": "application/json"
