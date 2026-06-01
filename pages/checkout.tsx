@@ -16,6 +16,8 @@ type CheckoutForm = {
 	state: string;
 	zipCode: string;
 	country: string;
+	createAccount?: boolean;
+	password?: string;
 };
 
 const INITIAL_FORM: CheckoutForm = {
@@ -27,7 +29,9 @@ const INITIAL_FORM: CheckoutForm = {
 	city: "",
 	state: "",
 	zipCode: "",
-	country: "Pakistan"
+	country: "Pakistan",
+	createAccount: false,
+	password: ""
 };
 
 export default function Checkout() {
@@ -79,10 +83,13 @@ export default function Checkout() {
 	const handleChange = (
 		event: ChangeEvent<HTMLInputElement | HTMLSelectElement>
 	) => {
-		const { name, value } = event.target;
+		const { name, value, type } = event.target;
+		const val =
+			type === "checkbox" ? (event.target as HTMLInputElement).checked : value;
+
 		setForm((current) => ({
 			...current,
-			[name]: value
+			[name]: val
 		}));
 	};
 
@@ -103,6 +110,10 @@ export default function Checkout() {
 			!form.country
 		) {
 			return "Please complete all checkout fields.";
+		}
+
+		if (form.createAccount && !form.password) {
+			return "Please provide a password to create an account.";
 		}
 
 		return "";
@@ -138,12 +149,14 @@ export default function Checkout() {
 				zipCode: form.zipCode,
 				country: form.country
 			},
-			guestCustomer: {
+			customer: {
 				firstName: form.firstName,
 				lastName: form.lastName,
 				email: form.email,
 				phone: form.phone
-			}
+			},
+			createAccount: form.createAccount,
+			password: form.password
 		};
 
 		const response = await createOrder(payload);
@@ -190,7 +203,7 @@ export default function Checkout() {
 								step === section.id ? "text-primary" : "text-on-surface-variant"
 							}`}
 						>
-							{section.label}
+							{section.label} Section.label
 						</span>
 						<div
 							className={`h-1 w-12 rounded-full transition-colors ${
@@ -209,12 +222,11 @@ export default function Checkout() {
 						</div>
 						<div>
 							<h2 className="font-serif text-2xl text-on-surface">
-								Cash on Delivery
+								Guest Checkout
 							</h2>
 							<p className="mt-2 text-sm text-on-surface-variant leading-relaxed">
-								No login required. We&apos;ll collect your shipping details,
-								create the order in your inventory, and mark payment as pending
-								for delivery.
+								Quick and easy. No login required. Optionally create an account
+								to track your orders and save your details for next time.
 							</p>
 						</div>
 					</div>
@@ -293,6 +305,61 @@ export default function Checkout() {
 						className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
 						placeholder="Phone Number"
 					/>
+
+					<div className="pt-4 space-y-4">
+						<label className="flex items-center gap-3 cursor-pointer group">
+							<div className="relative flex items-center justify-center w-5 h-5">
+								<input
+									type="checkbox"
+									name="createAccount"
+									checked={form.createAccount}
+									onChange={handleChange}
+									className="appearance-none w-5 h-5 border border-outline-variant rounded-md checked:bg-primary checked:border-primary transition-all cursor-pointer"
+								/>
+								{form.createAccount && (
+									<svg
+										className="absolute w-3 h-3 text-white pointer-events-none"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+										strokeWidth="4"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											d="M5 13l4 4L19 7"
+										/>
+									</svg>
+								)}
+							</div>
+							<span className="text-sm text-on-surface-variant group-hover:text-primary transition-colors">
+								Create an account for later?
+							</span>
+						</label>
+
+						<AnimatePresence>
+							{form.createAccount && (
+								<motion.div
+									initial={{ opacity: 0, height: 0 }}
+									animate={{ opacity: 1, height: "auto" }}
+									exit={{ opacity: 0, height: 0 }}
+									className="overflow-hidden"
+								>
+									<input
+										name="password"
+										type="password"
+										value={form.password}
+										onChange={handleChange}
+										className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+										placeholder="Create Password"
+									/>
+									<p className="mt-2 px-4 text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold">
+										Use at least 8 characters
+									</p>
+								</motion.div>
+							)}
+						</AnimatePresence>
+					</div>
 				</div>
 
 				<div className="space-y-stack-md">
@@ -358,10 +425,10 @@ export default function Checkout() {
 						<div className="flex items-center justify-between gap-4">
 							<div>
 								<p className="text-sm font-bold uppercase tracking-widest text-primary">
-									Cash on Delivery
+									Cash on Delivery (COD)
 								</p>
 								<p className="mt-2 text-sm text-on-surface-variant">
-									Payment stays pending until the parcel reaches the customer.
+									Pay when you receive your parcel.
 								</p>
 							</div>
 							<div className="rounded-full bg-primary/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-primary">
@@ -382,7 +449,7 @@ export default function Checkout() {
 					disabled={isSubmitting || items.length === 0}
 					className="w-full bg-primary text-white h-16 rounded-full font-serif text-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all mt-stack-lg disabled:opacity-60 disabled:hover:scale-100"
 				>
-					{isSubmitting ? "Placing Order..." : "Place Cash on Delivery Order"}
+					{isSubmitting ? "Placing Order..." : "Confirm Order"}
 				</button>
 			</form>
 

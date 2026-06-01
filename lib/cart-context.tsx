@@ -8,6 +8,9 @@ import {
 	type ReactNode
 } from "react";
 
+/**
+ * Types
+ */
 export type CartItem = {
 	id: string;
 	name: string;
@@ -33,22 +36,31 @@ type CartContextValue = {
 	clearCart: () => void;
 };
 
+/**
+ * Constants & Global State (for useSyncExternalStore)
+ */
 const STORAGE_KEY = "beautypoulor-cart";
 const CART_UPDATED_EVENT = "beautypoulor-cart-updated";
+const EMPTY_CART: CartItem[] = [];
+
 let cachedCartStorageValue: string | null = null;
-let cachedCartSnapshot: CartItem[] = [];
+let cachedCartSnapshot: CartItem[] = EMPTY_CART;
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
-function readCartFromStorage() {
+/**
+ * External Store Logic
+ */
+function readCartFromStorage(): CartItem[] {
 	if (typeof window === "undefined") {
-		return cachedCartSnapshot;
+		return EMPTY_CART;
 	}
 
 	try {
 		const storedCart = window.localStorage.getItem(STORAGE_KEY);
 		const nextStorageValue = storedCart ?? "";
 
+		// Optimization: return cached snapshot if storage hasn't changed
 		if (cachedCartStorageValue === nextStorageValue) {
 			return cachedCartSnapshot;
 		}
@@ -56,43 +68,39 @@ function readCartFromStorage() {
 		cachedCartStorageValue = nextStorageValue;
 		cachedCartSnapshot = storedCart
 			? (JSON.parse(storedCart) as CartItem[])
-			: [];
+			: EMPTY_CART;
 
 		return cachedCartSnapshot;
 	} catch (error) {
-		console.error("Failed to load cart:", error);
+		console.error("Failed to load cart from localStorage:", error);
 		cachedCartStorageValue = null;
-		cachedCartSnapshot = [];
-		return cachedCartSnapshot;
+		cachedCartSnapshot = EMPTY_CART;
+		return EMPTY_CART;
 	}
 }
 
 function writeCartToStorage(items: CartItem[]) {
-	if (typeof window === "undefined") {
-		return;
-	}
+	if (typeof window === "undefined") return;
 
-	const serializedItems = JSON.stringify(items);
-	cachedCartStorageValue = serializedItems;
-	cachedCartSnapshot = items;
-	window.localStorage.setItem(STORAGE_KEY, serializedItems);
-	window.dispatchEvent(new Event(CART_UPDATED_EVENT));
+	try {
+		const serializedItems = JSON.stringify(items);
+		cachedCartStorageValue = serializedItems;
+		cachedCartSnapshot = items;
+		window.localStorage.setItem(STORAGE_KEY, serializedItems);
+		window.dispatchEvent(new Event(CART_UPDATED_EVENT));
+	} catch (error) {
+		console.error("Failed to save cart to localStorage:", error);
+	}
 }
 
 function subscribeToCartUpdates(onStoreChange: () => void) {
-	if (typeof window === "undefined") {
-		return () => {};
-	}
+	if (typeof window === "undefined") return () => {};
 
 	const handleStorage = (event: StorageEvent) => {
-		if (event.key === STORAGE_KEY) {
-			onStoreChange();
-		}
+		if (event.key === STORAGE_KEY) onStoreChange();
 	};
 
-	const handleCustomEvent = () => {
-		onStoreChange();
-	};
+	const handleCustomEvent = () => onStoreChange();
 
 	window.addEventListener("storage", handleStorage);
 	window.addEventListener(CART_UPDATED_EVENT, handleCustomEvent);
@@ -103,71 +111,81 @@ function subscribeToCartUpdates(onStoreChange: () => void) {
 	};
 }
 
+/**
+ * Server Snapshot for SSR consistency
+ */
+const getServerSnapshot = () => EMPTY_CART;
+
+/**
+ * Provider Component
+ */
 export function CartProvider({ children }: { children: ReactNode }) {
 	const items = useSyncExternalStore(
 		subscribeToCartUpdates,
 		readCartFromStorage,
-		() => []
+		getServerSnapshot
 	);
 
 	const value = useMemo<CartContextValue>(() => {
-		const addToCart = (item: AddToCartInput) => {
-			const nextQuantity = Math.max(1, item.quantity || 1);
-			const currentItems = items;
-			const existingItem = currentItems.find(
-				(currentItem) => currentItem.id === item.id
-			);
-			const nextItems = existingItem
-				? currentItems.map((currentItem) =>
-						currentItem.id === item.id
-							? {
-									...currentItem,
-									quantity: Math.min(
-										currentItem.quantity + nextQuantity,
-										item.stock || currentItem.quantity + nextQuantity
-									)
-							  }
-							: currentItem
-				  )
-				: [
-						...currentItems,
-						{
-							...item,
-							quantity: Math.min(nextQuantity, item.stock || nextQuantity)
-						}
-				  ];
+		const calculateNextQuantity = (
+			requestedQuantity: number,
+			stock?: number
+		) => {
+			const validQuantity = Math.max(1, requestedQuantity);
+			return stock !== undefined ? Math.min(validQuantity, stock) : validQuantity;
+		};
+
+		const addToCart = (input: AddToCartInput) => {
+			const quantityToAdd = Math.max(1, input.quantity || 1);
+			const existingItem = items.find((item) => item.id === input.id);
+
+			let nextItems: CartItem[];
+
+			if (existingItem) {
+				nextItems = items.map((item) =>
+					item.id === input.id
+						? {
+								...item,
+								quantity: calculateNextQuantity(
+									item.quantity + quantityToAdd,
+									input.stock
+								)
+						  }
+						: item
+				);
+			} else {
+				nextItems = [
+					...items,
+					{
+						...input,
+						quantity: calculateNextQuantity(quantityToAdd, input.stock)
+					} as CartItem
+				];
+			}
 
 			writeCartToStorage(nextItems);
 		};
 
 		const removeFromCart = (id: string) => {
-			writeCartToStorage(
-				items.filter((currentItem) => currentItem.id !== id)
-			);
+			writeCartToStorage(items.filter((item) => item.id !== id));
 		};
 
 		const updateQuantity = (id: string, quantity: number) => {
-			writeCartToStorage(
-				items
-					.map((currentItem) => {
-						if (currentItem.id !== id) {
-							return currentItem;
-						}
+			const nextItems = items
+				.map((item) => {
+					if (item.id !== id) return item;
+					return {
+						...item,
+						quantity: calculateNextQuantity(quantity, item.stock)
+					};
+				})
+				.filter((item) => item.quantity > 0);
 
-						return {
-							...currentItem,
-							quantity: Math.min(
-								Math.max(1, quantity),
-								currentItem.stock || Math.max(1, quantity)
-							)
-						};
-					})
-					.filter((currentItem) => currentItem.quantity > 0)
-			);
+			writeCartToStorage(nextItems);
 		};
 
 		const clearCart = () => {
-			writeCartToStorage([]);
+			writeCartToStorage(EMPTY_CART);
 		};
 
 		return {
@@ -187,12 +205,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 	return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+/**
+ * Hook
+ */
 export function useCart() {
 	const context = useContext(CartContext);
-
 	if (!context) {
 		throw new Error("useCart must be used within a CartProvider");
 	}
-
 	return context;
 }

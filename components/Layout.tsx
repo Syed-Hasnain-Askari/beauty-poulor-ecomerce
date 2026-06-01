@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -48,54 +48,56 @@ export function Sidebar({
 		await router.push(path);
 	};
 
-	const categories = [
-		{ name: "All Products", path: "/category/all" },
-		{ name: "Best Sellers", path: "/" },
-		...dynamicCategories
-	].filter(
-		(category, index, array) =>
-			array.findIndex((item) => item.path === category.path) === index
-	);
+	const categories = useMemo(() => {
+		const baseCategories = [
+			{ name: "All Products", path: "/category/all" },
+			{ name: "Best Sellers", path: "/" }
+		];
+
+		const combined = [...baseCategories, ...dynamicCategories];
+
+		// Remove duplicates based on path
+		return combined.filter(
+			(category, index, array) =>
+				array.findIndex((item) => item.path === category.path) === index
+		);
+	}, [dynamicCategories]);
 
 	useEffect(() => {
 		let isMounted = true;
 
 		const loadCategories = async () => {
-			const response = await getCategories();
+			try {
+				const response = await getCategories();
 
-			if (!isMounted || !response?.success) {
-				return;
+				if (!isMounted || !response?.success) {
+					return;
+				}
+
+				const mappedCategories = Array.isArray(response.result)
+					? response.result
+							.map((category: CategoryResponseItem) => {
+								const name = category?.name;
+								const slug = category?.slug;
+
+								if (!name || !slug) {
+									return null;
+								}
+
+								return {
+									name,
+									path: `/category/${slug}`
+								};
+							})
+							.filter((category): category is SidebarCategory =>
+								Boolean(category)
+							)
+					: [];
+
+				setDynamicCategories(mappedCategories);
+			} catch (error) {
+				console.error("Failed to load categories in Sidebar:", error);
 			}
-
-			const mappedCategories = Array.isArray(response.result)
-				? response.result
-						.map((category: CategoryResponseItem) => {
-							const name = category?.name;
-							const path = category?.slug;
-
-							if (!name || !path) {
-								return null;
-							}
-
-							return {
-								name,
-								path: `/category/${path}`
-							};
-						})
-						.filter((category: any): category is SidebarCategory =>
-							Boolean(category)
-						)
-						.filter(
-							(
-								category: SidebarCategory,
-								index: number,
-								array: SidebarCategory[]
-							) =>
-								array.findIndex((item) => item.path === category.path) === index
-						)
-				: [];
-
-			setDynamicCategories(mappedCategories);
 		};
 
 		loadCategories();
@@ -139,9 +141,9 @@ export function Sidebar({
 							<ul className="flex flex-col gap-6">
 								{categories?.map((cat) => (
 									<li key={cat.name}>
-										<button
-											type="button"
-											onClick={() => navigateToCategory(cat.path)}
+										<Link
+											href={cat.path}
+											onClick={onClose}
 											className="w-full text-left text-lg font-serif text-matte-black hover:text-deep-rose transition-colors flex items-center justify-between group"
 										>
 											{cat.name}
@@ -152,7 +154,7 @@ export function Sidebar({
 											>
 												→
 											</motion.span>
-										</button>{" "}
+										</Link>
 									</li>
 								))}
 							</ul>
@@ -400,14 +402,11 @@ export function Footer() {
 }
 
 export default function Layout({
-	children,
-	pathname: propPathname
+	children
 }: {
 	children: React.ReactNode;
-	pathname?: string;
 }) {
-	const pathnameFromNavigation = usePathname();
-	const pathname = propPathname || pathnameFromNavigation || "/";
+	const pathname = usePathname();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
 	return (
@@ -415,17 +414,9 @@ export default function Layout({
 			<Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 			<Navbar onToggleSidebar={() => setIsSidebarOpen(true)} />
 			<main className="flex-1 overflow-x-hidden pt-24">
-				<AnimatePresence mode="wait">
-					<motion.div
-						key={pathname}
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 0.5 }}
-					>
-						{children}
-					</motion.div>
-				</AnimatePresence>
+				<div key={pathname}>
+					{children}
+				</div>
 			</main>
 			<Footer />
 		</div>

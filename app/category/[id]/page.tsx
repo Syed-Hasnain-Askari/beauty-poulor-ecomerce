@@ -1,4 +1,4 @@
-import { getCategories as getProductsByCategory } from "@/lib/action/productAction";
+import { getProductsByCategory } from "@/lib/action/productAction";
 import CategoryClient from "./CategoryClient";
 import { Metadata } from "next";
 
