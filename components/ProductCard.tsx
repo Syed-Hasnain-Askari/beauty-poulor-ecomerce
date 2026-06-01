@@ -2,18 +2,45 @@ import Link from "next/link";
 import Image from "next/image";
 import { Star, ShoppingCart, Heart } from "lucide-react";
 import { motion } from "motion/react";
+import { useCart } from "@/lib/cart-context";
 
-interface Product {
-	id: string;
-	brand: string;
-	name: string;
-	price: number;
-	rating: number;
-	reviews: number;
-	image: string;
-}
+type Product = {
+	product: {
+		id: string;
+		name: string;
+		description: string;
+		price: number;
+		categoryName: string;
+		image: string;
+		stock: number;
+		sku: string;
+		rating: number;
+		reviewCount: number;
+		reviews: number;
+		brand: string;
+	};
+};
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product }: Product) {
+	const { addToCart } = useCart();
+	const handleAddToCart = () => {
+		console.log("Adding to cart:", product);
+		if (product.stock === 0) {
+			return;
+		}
+
+		addToCart({
+			id: product.id,
+			name: product.name,
+			price: product.price,
+			image: product.image,
+			quantity: 1,
+			categoryName: product.categoryName,
+			sku: product.sku,
+			stock: product.stock
+		});
+	};
+	console.log(product);
 	return (
 		<motion.div
 			layout
@@ -31,7 +58,7 @@ export default function ProductCard({ product }: { product: Product }) {
 				>
 					<Image
 						alt={product.name}
-						src={product.image}
+						src={product?.image || "/images/banner-image.jpg"}
 						width={300}
 						height={400}
 						className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -45,23 +72,26 @@ export default function ProductCard({ product }: { product: Product }) {
 			<div className="px-1 flex flex-col justify-between grow">
 				<div>
 					<p className="text-[10px] text-gold font-bold tracking-widest uppercase mb-1">
-						{product.brand}
+						{product?.brand}
 					</p>
 					<h3 className="font-serif text-lg text-on-surface leading-tight mb-1">
-						{product.name}
+						{product?.name}
 					</h3>
 					<div className="flex items-center gap-1 mb-2">
 						<Star size={12} className="fill-gold text-gold" />
 						<span className="text-[10px] font-semibold text-on-surface-variant">
-							{product.rating} ({product.reviews})
+							{product?.rating} ({product?.reviews})
 						</span>
 					</div>
 				</div>
 				<div className="flex items-center justify-between mt-auto pt-2">
 					<span className="font-serif text-xl text-on-surface font-medium">
-						${product.price.toFixed(2)}
+						${product?.price.toFixed(2)}
 					</span>
-					<button className="w-10 h-10 flex items-center justify-center rounded-full bg-deep-rose text-white shadow-lg shadow-deep-rose/20 hover:scale-110 active:scale-90 transition-all">
+					<button
+						onClick={handleAddToCart}
+						className="w-10 h-10 flex items-center justify-center rounded-full bg-deep-rose text-white shadow-lg shadow-deep-rose/20 hover:scale-110 active:scale-90 transition-all"
+					>
 						<ShoppingCart size={18} />
 					</button>
 				</div>

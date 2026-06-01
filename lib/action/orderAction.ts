@@ -2,7 +2,10 @@
 
 import { handleResponse } from "@/utils";
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL = (process.env.BASE_URL || "http://localhost:3000").replace(
+	/\/$/,
+	""
+);
 
 export async function createOrder(orderData: any) {
 	try {
