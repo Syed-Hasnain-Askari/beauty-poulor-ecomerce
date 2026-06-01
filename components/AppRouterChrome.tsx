@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { usePathname } from 'next/navigation';
-import Layout from './Layout';
+import { usePathname } from "next/navigation";
+import Layout from "./Layout";
 
 export default function AppRouterChrome({
-  children,
+	children
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+	const pathname = usePathname();
 
-  return <Layout pathname={pathname ?? '/'}>{children}</Layout>;
+	return <Layout>{children}</Layout>;
 }

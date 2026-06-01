@@ -89,7 +89,7 @@ export function Sidebar({
 									path: `/category/${slug}`
 								};
 							})
-							.filter((category): category is SidebarCategory =>
+							.filter((category: any): category is SidebarCategory =>
 								Boolean(category)
 							)
 					: [];
@@ -401,11 +401,7 @@ export function Footer() {
 	);
 }
 
-export default function Layout({
-	children
-}: {
-	children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -414,9 +410,7 @@ export default function Layout({
 			<Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 			<Navbar onToggleSidebar={() => setIsSidebarOpen(true)} />
 			<main className="flex-1 overflow-x-hidden pt-24">
-				<div key={pathname}>
-					{children}
-				</div>
+				<div key={pathname}>{children}</div>
 			</main>
 			<Footer />
 		</div>
