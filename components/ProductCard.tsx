@@ -4,24 +4,21 @@ import { Star, ShoppingCart, Heart } from "lucide-react";
 import { motion } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 
-type Product = {
-	product: {
-		id: string;
-		name: string;
-		description: string;
-		price: number;
-		categoryName: string;
-		image: string;
-		stock: number;
-		sku: string;
-		rating: number;
-		reviewCount: number;
-		reviews: number;
-		brand: string;
-	};
+type ProductCard = {
+	id: string;
+	name: string;
+	description: string;
+	price: number;
+	categoryName: string;
+	image: string;
+	stock: number;
+	sku: string;
+	rating: number;
+	brand: string;
+	reviewCount: number;
 };
 
-export default function ProductCard({ product }: Product) {
+export default function ProductCard(product: ProductCard) {
 	const { addToCart } = useCart();
 	const handleAddToCart = () => {
 		console.log("Adding to cart:", product);
@@ -80,7 +77,7 @@ export default function ProductCard({ product }: Product) {
 					<div className="flex items-center gap-1 mb-2">
 						<Star size={12} className="fill-gold text-gold" />
 						<span className="text-[10px] font-semibold text-on-surface-variant">
-							{product?.rating} ({product?.reviews})
+							{product?.rating} ({product?.reviewCount})
 						</span>
 					</div>
 				</div>

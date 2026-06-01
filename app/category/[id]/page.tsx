@@ -39,10 +39,15 @@ async function getCategoryData(slug: string) {
 		products: apiProducts.map((product) => ({
 			id: product._id,
 			brand: product.category?.name || "Beauty Edit",
+			categoryName: product.category?.name || "Beauty Edit",
 			name: product.name,
+			description: product.name,
+			sku: product._id,
 			price: product.price,
 			rating: product.rating || 0,
+			reviewCount: Array.isArray(product.reviews) ? product.reviews.length : 0,
 			reviews: Array.isArray(product.reviews) ? product.reviews.length : 0,
+			stock: 0,
 			image: product.images?.[0] || "/images/banner-image.jpg"
 		}))
 	};

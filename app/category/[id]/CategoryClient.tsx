@@ -8,11 +8,16 @@ import { motion, AnimatePresence } from "motion/react";
 type CategoryPageProduct = {
 	id: string;
 	brand: string;
+	categoryName: string;
 	name: string;
+	description: string;
+	sku: string;
 	price: number;
 	rating: number;
+	reviewCount: number;
 	reviews: number;
 	image: string;
+	stock: number;
 };
 
 type CategoryPageProps = {
@@ -141,26 +146,26 @@ export default function CategoryClient({
 					</div>
 
 					<div className="flex overflow-x-auto no-scrollbar gap-8 pb-8 snap-x">
-						{filteredProducts.map((product) => (
-							<div key={product.id} className="snap-start flex-shrink-0 w-72">
-								<ProductCard product={product} />
+						{filteredProducts.length > 0 ? (
+							filteredProducts.map((product) => (
+								<div key={product.id} className="snap-start flex-shrink-0 w-72">
+									<ProductCard {...product} />
+								</div>
+							))
+						) : (
+							<div className="py-20 text-center">
+								<p className="text-on-surface-variant">
+									No products match your filters.
+								</p>
+								<button
+									onClick={clearFilters}
+									className="mt-4 text-primary font-bold uppercase tracking-widest text-xs underline"
+								>
+									Clear All
+								</button>
 							</div>
-						))}
+						)}
 					</div>
-
-					{filteredProducts.length === 0 && (
-						<div className="py-20 text-center">
-							<p className="text-on-surface-variant">
-								No products match your filters.
-							</p>
-							<button
-								onClick={clearFilters}
-								className="mt-4 text-primary font-bold uppercase tracking-widest text-xs underline"
-							>
-								Clear All
-							</button>
-						</div>
-					)}
 				</div>
 			</section>
 
