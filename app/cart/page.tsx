@@ -1,7 +1,8 @@
+"use client";
 import Link from "next/link";
 import { X, Minus, Plus, Info, ArrowRight, Gift } from "lucide-react";
 import { motion } from "motion/react";
-import { useCart } from "../lib/cart-context";
+import { useCart } from "../../lib/cart-context";
 import Image from "next/image";
 
 export default function Cart() {

@@ -1,3 +1,4 @@
+"use client";
 import { useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { ChevronDown, Info, PackageCheck, Truck } from "lucide-react";
@@ -186,34 +187,6 @@ export default function Checkout() {
 
 	return (
 		<div className="pt-8 pb-section-gap px-margin-mobile max-w-lg mx-auto">
-			<nav className="flex justify-between items-center mb-stack-lg px-2">
-				{[
-					{ id: 1, label: "Information" },
-					{ id: 2, label: "Shipping" },
-					{ id: 3, label: "Confirm" }
-				].map((section) => (
-					<div
-						key={section.id}
-						className={`flex flex-col items-center gap-1 transition-opacity ${
-							step >= section.id ? "opacity-100" : "opacity-30"
-						}`}
-					>
-						<span
-							className={`text-[10px] font-bold uppercase tracking-widest ${
-								step === section.id ? "text-primary" : "text-on-surface-variant"
-							}`}
-						>
-							{section.label} Section.label
-						</span>
-						<div
-							className={`h-1 w-12 rounded-full transition-colors ${
-								step >= section.id ? "bg-primary" : "bg-outline-variant"
-							}`}
-						></div>
-					</div>
-				))}
-			</nav>
-
 			<section className="mb-stack-lg">
 				<div className="rounded-3xl border border-primary/15 bg-primary/5 p-6 shadow-sm">
 					<div className="flex items-start gap-4">
