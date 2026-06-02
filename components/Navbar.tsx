@@ -48,12 +48,12 @@ export const Navbar = ({
 							Shop
 							<span className={navLinkHoverClass}></span>
 						</Link>
-						<Link href="/contact" className={navLinkClass}>
+						<Link href="" className={navLinkClass}>
 							About
 							<span className={navLinkHoverClass}></span>
 						</Link>
 						<Link href="/contact" className={navLinkClass}>
-							Blog
+							Contact
 							<span className={navLinkHoverClass}></span>
 						</Link>
 					</div>

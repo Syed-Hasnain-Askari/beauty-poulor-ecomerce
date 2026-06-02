@@ -24,3 +24,16 @@ export interface Category {
 	updatedAt: string;
 	isActive: boolean;
 }
+export interface CheckoutForm {
+	firstName: string;
+	lastName: string;
+	email: string;
+	phone: string;
+	street: string;
+	city: string;
+	state: string;
+	zipCode: string;
+	country: string;
+	createAccount?: boolean;
+	password?: string;
+}
