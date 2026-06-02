@@ -8,7 +8,5 @@ export default function AppRouterChrome({
 }: {
 	children: React.ReactNode;
 }) {
-	const pathname = usePathname();
-
 	return <Layout>{children}</Layout>;
 }

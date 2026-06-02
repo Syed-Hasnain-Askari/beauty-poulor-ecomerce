@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import ProductCard from "./ProductCard";
@@ -15,6 +14,7 @@ import {
 	Zap
 } from "lucide-react";
 import { motion } from "motion/react";
+import { Product } from "@/app/types";
 
 const CATEGORIES = [
 	{
@@ -110,7 +110,8 @@ const REVIEWS = [
 	}
 ];
 
-export default function HomePage() {
+export const HomePage = async ({ products }: { products: Product[] }) => {
+	console.log(products, "products");
 	return (
 		<div className="flex flex-col w-full overflow-hidden">
 			<section className="relative min-h-screen flex flex-col lg:flex-row items-center bg-warm-cream">
@@ -249,13 +250,13 @@ export default function HomePage() {
 						</div>
 					</div>
 
-					{/* <div className="flex overflow-x-auto no-scrollbar gap-8 pb-8 snap-x">
-            {BESTSELLERS.map((product) => (
-              <div key={product.id} className="snap-start flex-shrink-0 w-72">
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div> */}
+					<div className="flex overflow-x-auto no-scrollbar gap-8 pb-8 snap-x">
+						{products?.map((product) => (
+							<div key={product._id} className="snap-start flex-shrink-0 w-72">
+								<ProductCard products={product} />
+							</div>
+						))}
+					</div>
 
 					<div className="mt-12 text-center">
 						<Link
@@ -452,4 +453,4 @@ export default function HomePage() {
 			</section>
 		</div>
 	);
-}
+};

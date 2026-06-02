@@ -2,14 +2,11 @@
 
 import { handleResponse } from "@/utils";
 
-const BASE_URL = (process.env.BASE_URL || "http://localhost:3000").replace(
-	/\/$/,
-	""
-);
+const BASE_URL = process.env.BASE_URL;
 
 export async function createOrder(orderData: any) {
 	try {
-		const response = await fetch(`${BASE_URL}/api/orders`, {
+		const response = await fetch(`${process.env.BASE_URL}/api/orders`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(orderData),

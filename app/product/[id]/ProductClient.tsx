@@ -12,6 +12,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "../../../lib/cart-context";
 import Image from "next/image";
+import { Product } from "@/app/types";
 
 const REVIEWS = [
 	{
@@ -28,28 +29,14 @@ const REVIEWS = [
 	}
 ];
 
-type ProductDetailProps = {
-	product: {
-		id: string;
-		name: string;
-		description: string;
-		price: number;
-		categoryName: string;
-		images: string[];
-		stock: number;
-		sku: string;
-		rating: number;
-		reviewCount: number;
-	};
-};
-
-export default function ProductClient({ product }: ProductDetailProps) {
+export default function ProductClient({ product }: { product: Product }) {
+	console.log(product, "ProductClient product");
 	const [quantity, setQuantity] = useState(1);
 	const [activeTab, setActiveTab] = useState<string | null>("description");
 	const [isAdded, setIsAdded] = useState(false);
 	const { addToCart } = useCart();
 	const roundedRating = Math.max(0, Math.min(5, Math.round(product.rating)));
-	const reviewCount = product.reviewCount || REVIEWS.length;
+	const reviewCount = product.reviews?.length || 0;
 
 	const handleAddToCart = () => {
 		if (product.stock === 0) {
@@ -57,12 +44,12 @@ export default function ProductClient({ product }: ProductDetailProps) {
 		}
 
 		addToCart({
-			id: product.id,
+			id: product._id,
 			name: product.name,
 			price: product.price,
 			image: product.images[0],
 			quantity,
-			categoryName: product.categoryName,
+			categoryName: product.category?.name || "Beauty Essentials",
 			sku: product.sku,
 			stock: product.stock
 		});
@@ -76,21 +63,16 @@ export default function ProductClient({ product }: ProductDetailProps) {
 				{/* Gallery */}
 				<section className="lg:w-1/2 relative bg-surface-variant/20">
 					<div className="overflow-x-auto snap-x snap-mandatory flex no-scrollbar">
-						{product.images.map((img, idx) => (
-							<div
-								key={idx}
-								className="flex-shrink-0 w-full aspect-square snap-start"
-							>
-								<Image
-									alt={`${product.name} ${idx + 1}`}
-									src={img}
-									loading="eager"
-									width={600}
-									height={600}
-									className="w-full h-full object-cover"
-								/>
-							</div>
-						))}
+						<div className="flex-shrink-0 w-full aspect-square snap-start">
+							<Image
+								alt={`${product.name}`}
+								src={product?.images[0] || "/images/banner-image.jpg"}
+								loading="eager"
+								width={600}
+								height={600}
+								className="w-full h-full object-cover"
+							/>
+						</div>
 					</div>
 					<div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
 						{product.images.map((_, idx) => (
@@ -122,7 +104,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 							</span>
 						</div>
 						<p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">
-							{product.categoryName}
+							{product.category?.name || "Beauty Essentials"}
 						</p>
 						<h2 className="font-serif text-3xl md:text-4xl text-on-surface">
 							{product.name}
@@ -176,7 +158,7 @@ export default function ProductClient({ product }: ProductDetailProps) {
 							{
 								id: "product-details",
 								title: "Product Details",
-								content: `Category: ${product.categoryName}. SKU: ${product.sku}. Available stock: ${product.stock}.`
+								content: `Category: ${product.category?.name || "Beauty Essentials"}. SKU: ${product.sku}. Available stock: ${product.stock}.`
 							},
 							{
 								id: "shipping",

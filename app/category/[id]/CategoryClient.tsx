@@ -4,43 +4,25 @@ import { useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { SlidersHorizontal, Star, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-
-type CategoryPageProduct = {
-	id: string;
-	brand: string;
-	categoryName: string;
-	name: string;
-	description: string;
-	sku: string;
-	price: number;
-	rating: number;
-	reviewCount: number;
-	reviews: number;
-	image: string;
-	stock: number;
-};
-
-type CategoryPageProps = {
-	categoryName: string;
-	products: CategoryPageProduct[];
-};
-
-export default function CategoryClient({
-	categoryName,
-	products
-}: CategoryPageProps) {
+import { Product } from "@/app/types";
+import { useParams } from "next/navigation";
+export default function CategoryClient({ products }: { products: Product[] }) {
+	console.log(products);
+	const params = useParams();
+	const id: string = (params as { id?: string } | null)?.id ?? "";
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 	const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
 	const [minRating, setMinRating] = useState(0);
 	const [maxPrice, setMaxPrice] = useState<number | null>(null);
 
 	const brands = useMemo(
-		() => Array.from(new Set(products.map((product) => product.brand))),
+		() =>
+			Array.from(new Set(products?.map((product) => product.category?.name))),
 		[products]
 	);
 
 	const highestPrice = useMemo(() => {
-		if (!products.length) {
+		if (!products?.length) {
 			return 200;
 		}
 
@@ -48,9 +30,10 @@ export default function CategoryClient({
 	}, [products]);
 
 	const filteredProducts = useMemo(() => {
-		return products.filter((product) => {
+		return products?.filter((product) => {
 			const brandMatch =
-				selectedBrands.length === 0 || selectedBrands.includes(product.brand);
+				selectedBrands.length === 0 ||
+				selectedBrands.includes(product.category.name);
 			const priceMatch = maxPrice === null || product.price <= maxPrice;
 			const ratingMatch = product.rating >= minRating;
 			return brandMatch && priceMatch && ratingMatch;
@@ -75,11 +58,12 @@ export default function CategoryClient({
 		<div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg relative min-h-screen">
 			<section className="mb-stack-lg">
 				<h2 className="font-serif text-4xl md:text-5xl text-on-surface tracking-tight">
-					{categoryName}
+					{id === "all" ? "All Products" : products[0]?.category?.name}
 				</h2>
 				<p className="text-sm text-on-surface-variant mt-2 max-w-md">
-					Discover editorial-grade formulas designed for lasting radiance and
-					skin health.
+					{id === "all"
+						? "Discover our complete range of beauty products."
+						: products[0]?.category?.description}
 				</p>
 			</section>
 
@@ -92,7 +76,7 @@ export default function CategoryClient({
 						<SlidersHorizontal size={20} />
 						Filter & Sort
 					</button>
-					<div className="hidden md:flex gap-2 items-center text-xs font-semibold text-on-surface-variant">
+					<div className="hidden md:flex gap-2 items-center text-xs font-semibold border-on-background text-on-background">
 						{filteredProducts.length} Products
 					</div>
 				</div>
@@ -134,12 +118,9 @@ export default function CategoryClient({
 				</div>
 			</section>
 
-			<section className="py-section-gap bg-white/50 mt-stack-md">
+			<section className="py-section-gap mt-stack-md">
 				<div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
 					<div className="flex items-center justify-between mb-8 gap-4">
-						<h2 className="font-serif text-4xl md:text-5xl text-on-surface tracking-tight">
-							{categoryName}
-						</h2>
 						<div className="text-sm text-on-surface-variant">
 							{filteredProducts.length} Products
 						</div>
@@ -148,8 +129,11 @@ export default function CategoryClient({
 					<div className="flex overflow-x-auto no-scrollbar gap-8 pb-8 snap-x">
 						{filteredProducts.length > 0 ? (
 							filteredProducts.map((product) => (
-								<div key={product.id} className="snap-start flex-shrink-0 w-72">
-									<ProductCard {...product} />
+								<div
+									key={product._id}
+									className="snap-start flex-shrink-0 w-72"
+								>
+									<ProductCard products={product} />
 								</div>
 							))
 						) : (

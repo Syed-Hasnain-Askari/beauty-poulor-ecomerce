@@ -1,43 +1,31 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Star, ShoppingCart, Heart } from "lucide-react";
 import { motion } from "motion/react";
 import { useCart } from "@/lib/cart-context";
+import { Product } from "@/app/types";
 
-type ProductCard = {
-	id: string;
-	name: string;
-	description: string;
-	price: number;
-	categoryName: string;
-	image: string;
-	stock: number;
-	sku: string;
-	rating: number;
-	brand: string;
-	reviewCount: number;
-};
-
-export default function ProductCard(product: ProductCard) {
+export default function ProductCard({ products }: { products: Product }) {
+	console.log("ProductCard products:", products);
 	const { addToCart } = useCart();
 	const handleAddToCart = () => {
-		console.log("Adding to cart:", product);
-		if (product.stock === 0) {
+		console.log("Adding to cart:", products);
+		if (products.stock === 0) {
 			return;
 		}
 
 		addToCart({
-			id: product.id,
-			name: product.name,
-			price: product.price,
-			image: product.image,
+			id: products._id,
+			name: products.name,
+			price: products.price,
+			image: products.images?.[0] || "/images/banner-image.jpg",
 			quantity: 1,
-			categoryName: product.categoryName,
-			sku: product.sku,
-			stock: product.stock
+			sku: products.sku,
+			stock: products.stock
 		});
 	};
-	console.log(product);
+	console.log(products);
 	return (
 		<motion.div
 			layout
@@ -49,13 +37,13 @@ export default function ProductCard(product: ProductCard) {
 		>
 			<div className="relative aspect-[3/4] rounded-3xl overflow-hidden mb-4 shadow-sm bg-surface-variant/20">
 				<Link
-					href={`/product/${product.id}`}
+					href={`/product/${products?._id}`}
 					className="block w-full h-full relative"
 					prefetch={false}
 				>
 					<Image
-						alt={product.name}
-						src={product?.image || "/images/banner-image.jpg"}
+						alt={products?.name}
+						src={products?.images?.[0] || "/images/banner-image.jpg"}
 						width={300}
 						height={400}
 						className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -69,21 +57,22 @@ export default function ProductCard(product: ProductCard) {
 			<div className="px-1 flex flex-col justify-between grow">
 				<div>
 					<p className="text-[10px] text-gold font-bold tracking-widest uppercase mb-1">
-						{product?.brand}
+						{products?.category?.name || "Beauty Edit"}
 					</p>
 					<h3 className="font-serif text-lg text-on-surface leading-tight mb-1">
-						{product?.name}
+						{products?.name}
 					</h3>
 					<div className="flex items-center gap-1 mb-2">
 						<Star size={12} className="fill-gold text-gold" />
 						<span className="text-[10px] font-semibold text-on-surface-variant">
-							{product?.rating} ({product?.reviewCount})
+							{products?.rating} (
+							{products?.rating ? products.reviews?.length : 0} reviews)
 						</span>
 					</div>
 				</div>
 				<div className="flex items-center justify-between mt-auto pt-2">
 					<span className="font-serif text-xl text-on-surface font-medium">
-						${product?.price.toFixed(2)}
+						${products?.price.toFixed(2)}
 					</span>
 					<button
 						onClick={handleAddToCart}
