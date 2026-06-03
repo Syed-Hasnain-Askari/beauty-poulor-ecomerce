@@ -1,7 +1,17 @@
 "use client";
 import { useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
-import { ChevronDown, Info, PackageCheck, Truck } from "lucide-react";
+import {
+	Calendar,
+	CheckCircle2,
+	ChevronDown,
+	CreditCard,
+	Info,
+	MapPin,
+	PackageCheck,
+	ShoppingBag,
+	Truck
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "@/lib/cart-context";
 import { createOrder } from "@/lib/action/orderAction";
@@ -31,6 +41,7 @@ export default function CheckoutPage() {
 	const [orderSuccess, setOrderSuccess] = useState<{
 		orderNumber?: string;
 		message?: string;
+		date?: string;
 	} | null>(null);
 	const [placedOrderSnapshot, setPlacedOrderSnapshot] = useState<{
 		items: typeof items;
@@ -170,7 +181,12 @@ export default function CheckoutPage() {
 			message:
 				response?.message ||
 				response?.data?.message ||
-				"Order placed successfully."
+				"Order placed successfully.",
+			date: new Date().toLocaleDateString("en-US", {
+				year: "numeric",
+				month: "long",
+				day: "numeric"
+			})
 		});
 		setPlacedOrderSnapshot({
 			items,
@@ -183,67 +199,127 @@ export default function CheckoutPage() {
 	};
 
 	return (
-		<div className="pt-8 pb-section-gap px-margin-mobile max-w-lg mx-auto">
-			<section className="mb-stack-lg">
-				<div className="rounded-3xl border border-primary/15 bg-primary/5 p-6 shadow-sm">
-					<div className="flex items-start gap-4">
-						<div className="rounded-2xl bg-white p-3 text-primary shadow-sm">
-							<Truck size={22} />
-						</div>
-						<div>
-							<h2 className="font-serif text-2xl text-on-surface">
-								Guest Checkout
-							</h2>
-							<p className="mt-2 text-sm text-on-surface-variant leading-relaxed">
-								Quick and easy. No login required. Optionally create an account
-								to track your orders and save your details for next time.
-							</p>
+		<div
+			className={`pt-8 pb-section-gap px-margin-mobile transition-all duration-700 mx-auto ${orderSuccess ? "max-w-4xl" : "max-w-lg"}`}
+		>
+			{!orderSuccess && (
+				<section className="mb-stack-lg">
+					<div className="rounded-3xl border border-primary/15 bg-primary/5 p-6 shadow-sm">
+						<div className="flex items-start gap-4">
+							<div className="rounded-2xl bg-white p-3 text-primary shadow-sm">
+								<Truck size={22} />
+							</div>
+							<div>
+								<h2 className="font-serif text-2xl text-on-surface">
+									Guest Checkout
+								</h2>
+								<p className="mt-2 text-sm text-on-surface-variant leading-relaxed">
+									Quick and easy. No login required. Optionally create an
+									account to track your orders and save your details for next
+									time.
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
-			</section>
-			{/* Order placed Section */}
+				</section>
+			)}
+
 			<AnimatePresence mode="wait">
 				{orderSuccess ? (
 					<motion.div
 						key="success"
-						initial={{ opacity: 0, scale: 0.95 }}
-						animate={{ opacity: 1, scale: 1 }}
-						className="space-y-stack-lg py-12 text-center"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						className="space-y-stack-md"
 					>
-						<div className="flex justify-center">
-							<div className="rounded-full bg-primary/10 p-6 text-primary shadow-inner">
-								<PackageCheck size={64} strokeWidth={1.5} />
+						{/* Success Hero */}
+						<div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-outline-variant/20 text-center space-y-6">
+							<div className="flex justify-center">
+								<div className="relative">
+									<motion.div
+										initial={{ scale: 0 }}
+										animate={{ scale: 1 }}
+										transition={{
+											type: "spring",
+											stiffness: 260,
+											damping: 20,
+											delay: 0.1
+										}}
+										className="rounded-full bg-primary/10 p-8 text-primary relative z-10"
+									>
+										<PackageCheck size={64} strokeWidth={1.5} />
+									</motion.div>
+									<motion.div
+										animate={{
+											scale: [1, 1.2, 1],
+											opacity: [0.3, 0.1, 0.3]
+										}}
+										transition={{
+											duration: 4,
+											repeat: Infinity,
+											ease: "easeInOut"
+										}}
+										className="absolute inset-0 rounded-full bg-primary/20 -z-0"
+									/>
+								</div>
+							</div>
+
+							<div className="space-y-3">
+								<h3 className="font-serif text-4xl md:text-5xl text-on-surface">
+									Order Confirmed!
+								</h3>
+								<p className="text-on-surface-variant max-w-md mx-auto leading-relaxed text-sm md:text-base">
+									Thank you for choosing Lumière. Your beauty essentials are
+									being prepared with care. We&apos;ve sent a confirmation email
+									to{" "}
+									<span className="font-bold text-primary">{form.email}</span>
+								</p>
+							</div>
+
+							<div className="flex flex-wrap justify-center gap-4 pt-4">
+								<div className="bg-surface-variant/20 rounded-2xl px-6 py-4 flex items-center gap-3 border border-outline-variant/10">
+									<div className="text-primary">
+										<CheckCircle2 size={18} />
+									</div>
+									<div className="text-left">
+										<p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+											Order Number
+										</p>
+										<p className="text-sm font-semibold text-on-surface">
+											#{orderSuccess.orderNumber}
+										</p>
+									</div>
+								</div>
+								<div className="bg-surface-variant/20 rounded-2xl px-6 py-4 flex items-center gap-3 border border-outline-variant/10">
+									<div className="text-primary">
+										<Calendar size={18} />
+									</div>
+									<div className="text-left">
+										<p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+											Date Placed
+										</p>
+										<p className="text-sm font-semibold text-on-surface">
+											{orderSuccess.date}
+										</p>
+									</div>
+								</div>
 							</div>
 						</div>
-						
-						<div className="space-y-4">
-							<h3 className="font-serif text-4xl text-on-surface">
-								Thank You!
-							</h3>
-							<p className="text-on-surface-variant max-w-sm mx-auto leading-relaxed">
-								{orderSuccess.message} We&apos;ve sent a confirmation email with your order details.
-							</p>
-						</div>
 
-						{orderSuccess.orderNumber && (
-							<div className="bg-primary/5 rounded-3xl border border-primary/10 p-8 max-w-sm mx-auto">
-								<p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 mb-2">
-									Order Reference
-								</p>
-								<p className="text-2xl font-serif text-primary tracking-wide">
-									#{orderSuccess.orderNumber}
-								</p>
-							</div>
-						)}
-
-						<div className="pt-8">
+						{/* Footer Actions */}
+						<div className="pt-8 text-center flex flex-col md:flex-row justify-center items-center gap-6">
 							<Link
 								href="/category/all"
-								className="inline-flex items-center justify-center bg-primary text-white h-16 px-12 rounded-full font-serif text-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+								className="group inline-flex items-center justify-center bg-primary text-white h-16 px-12 rounded-full font-serif text-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all w-full md:w-auto"
 							>
 								Continue Shopping
 							</Link>
+							{/* <button
+								onClick={() => window.print()}
+								className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/40 hover:text-primary transition-colors flex items-center gap-2"
+							>
+								<Info size={14} /> Print Order Receipt
+							</button> */}
 						</div>
 					</motion.div>
 				) : (
@@ -405,7 +481,9 @@ export default function CheckoutPage() {
 						</div>
 
 						<div className="space-y-stack-md pt-stack-lg border-t border-outline-variant/30">
-							<h3 className="font-serif text-xl text-on-surface">Payment Method</h3>
+							<h3 className="font-serif text-xl text-on-surface">
+								Payment Method
+							</h3>
 							<div className="rounded-2xl border border-outline-variant bg-white p-6 shadow-sm">
 								<div className="flex items-center justify-between gap-4">
 									<div>
@@ -440,103 +518,105 @@ export default function CheckoutPage() {
 				)}
 			</AnimatePresence>
 
-			<aside className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-outline-variant/30 p-margin-mobile z-40 shadow-2xl">
-				<div className="max-w-lg mx-auto">
-					<div className="flex items-center justify-between mb-4">
-						<div className="flex -space-x-4">
-							{summaryItems.slice(0, 3).map((item) => (
-								<div
-									key={item.id}
-									className="w-12 h-12 rounded-lg border-2 border-white overflow-hidden relative shadow-md"
-								>
-									<Image
-										src={item.image}
-										className="w-full h-full object-cover"
-										alt={item.name}
-										loading="eager"
-										width={48}
-										height={48}
-									/>
-									<span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
-										{item.quantity}
-									</span>
-								</div>
-							))}
-							{summaryItems.length === 0 && (
-								<div className="text-xs font-semibold text-on-surface-variant">
-									No items selected
-								</div>
-							)}
+			{!orderSuccess && (
+				<aside className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-outline-variant/30 p-margin-mobile z-40 shadow-2xl">
+					<div className="max-w-lg mx-auto">
+						<div className="flex items-center justify-between mb-4">
+							<div className="flex -space-x-4">
+								{summaryItems.slice(0, 3).map((item) => (
+									<div
+										key={item.id}
+										className="w-12 h-12 rounded-lg border-2 border-white overflow-hidden relative shadow-md"
+									>
+										<Image
+											src={item.image}
+											className="w-full h-full object-cover"
+											alt={item.name}
+											loading="eager"
+											width={48}
+											height={48}
+										/>
+										<span className="absolute -top-1 -right-1 bg-primary text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+											{item.quantity}
+										</span>
+									</div>
+								))}
+								{summaryItems.length === 0 && (
+									<div className="text-xs font-semibold text-on-surface-variant">
+										No items selected
+									</div>
+								)}
+							</div>
+							<div className="text-right">
+								<p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+									Total
+								</p>
+								<p className="font-serif text-2xl text-primary">
+									${summaryTotal.toFixed(2)}
+								</p>
+							</div>
 						</div>
-						<div className="text-right">
-							<p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-								Total
-							</p>
-							<p className="font-serif text-2xl text-primary">
-								${summaryTotal.toFixed(2)}
-							</p>
-						</div>
-					</div>
 
-					<AnimatePresence>
-						{showDetails && (
-							<motion.div
-								initial={{ opacity: 0, height: 0 }}
-								animate={{ opacity: 1, height: "auto" }}
-								exit={{ opacity: 0, height: 0 }}
-								className="overflow-hidden"
-							>
-								<div className="space-y-3 border-t border-outline-variant/20 pt-4 mb-4">
-									{summaryItems.map((item) => (
-										<div
-											key={item.id}
-											className="flex items-center justify-between gap-4 text-sm"
-										>
-											<div>
-												<p className="font-semibold text-on-surface">
-													{item.name}
-												</p>
-												<p className="text-xs text-on-surface-variant">
-													Qty {item.quantity}
+						<AnimatePresence>
+							{showDetails && (
+								<motion.div
+									initial={{ opacity: 0, height: 0 }}
+									animate={{ opacity: 1, height: "auto" }}
+									exit={{ opacity: 0, height: 0 }}
+									className="overflow-hidden"
+								>
+									<div className="space-y-3 border-t border-outline-variant/20 pt-4 mb-4">
+										{summaryItems.map((item) => (
+											<div
+												key={item.id}
+												className="flex items-center justify-between gap-4 text-sm"
+											>
+												<div>
+													<p className="font-semibold text-on-surface">
+														{item.name}
+													</p>
+													<p className="text-xs text-on-surface-variant">
+														Qty {item.quantity}
+													</p>
+												</div>
+												<p className="font-semibold text-primary">
+													${(item.price * item.quantity).toFixed(2)}
 												</p>
 											</div>
-											<p className="font-semibold text-primary">
-												${(item.price * item.quantity).toFixed(2)}
-											</p>
+										))}
+										<div className="flex items-center justify-between text-sm text-on-surface-variant pt-2">
+											<div className="flex items-center gap-1">
+												<span>Shipping</span>
+												<Info size={14} className="opacity-50" />
+											</div>
+											<span>Free</span>
 										</div>
-									))}
-									<div className="flex items-center justify-between text-sm text-on-surface-variant pt-2">
-										<div className="flex items-center gap-1">
-											<span>Shipping</span>
-											<Info size={14} className="opacity-50" />
+										<div className="flex items-center justify-between text-sm font-semibold">
+											<span>{summaryItemCount} item(s)</span>
+											<span>${summarySubtotal.toFixed(2)}</span>
 										</div>
-										<span>Free</span>
 									</div>
-									<div className="flex items-center justify-between text-sm font-semibold">
-										<span>{summaryItemCount} item(s)</span>
-										<span>${summarySubtotal.toFixed(2)}</span>
-									</div>
-								</div>
-							</motion.div>
-						)}
-					</AnimatePresence>
+								</motion.div>
+							)}
+						</AnimatePresence>
 
-					<button
-						onClick={() => setShowDetails((current) => !current)}
-						className="w-full text-primary text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 hover:opacity-70 transition-opacity"
-					>
-						{showDetails ? "Hide details" : "Show details"}
-						<ChevronDown
-							size={14}
-							className={
-								showDetails
-									? "rotate-180 transition-transform"
-									: "transition-transform"
-							}
-						/>
-					</button>
-				</div>
-			</aside>
+						<button
+							onClick={() => setShowDetails((current) => !current)}
+							className="w-full text-primary text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 hover:opacity-70 transition-opacity"
+						>
+							{showDetails ? "Hide details" : "Show details"}
+							<ChevronDown
+								size={14}
+								className={
+									showDetails
+										? "rotate-180 transition-transform"
+										: "transition-transform"
+								}
+							/>
+						</button>
+					</div>
+				</aside>
+			)}
 		</div>
 	);
 }
