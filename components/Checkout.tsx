@@ -163,6 +163,8 @@ export default function CheckoutPage() {
 			return;
 		}
 
+		window.scrollTo({ top: 0, behavior: "smooth" });
+
 		setOrderSuccess({
 			orderNumber: response?.data?.orderNumber || response?.result?.orderNumber,
 			message:
@@ -201,225 +203,242 @@ export default function CheckoutPage() {
 				</div>
 			</section>
 			{/* Order placed Section */}
-			<AnimatePresence>
-				{orderSuccess && (
+			<AnimatePresence mode="wait">
+				{orderSuccess ? (
 					<motion.div
-						initial={{ opacity: 0, y: 8 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -8 }}
-						className="mb-stack-lg rounded-3xl border border-primary/20 bg-white p-6 shadow-sm"
+						key="success"
+						initial={{ opacity: 0, scale: 0.95 }}
+						animate={{ opacity: 1, scale: 1 }}
+						className="space-y-stack-lg py-12 text-center"
 					>
-						<div className="flex items-start gap-4">
-							<div className="rounded-2xl bg-primary/10 p-3 text-primary">
-								<PackageCheck size={24} />
+						<div className="flex justify-center">
+							<div className="rounded-full bg-primary/10 p-6 text-primary shadow-inner">
+								<PackageCheck size={64} strokeWidth={1.5} />
 							</div>
-							<div>
-								<h3 className="font-serif text-xl text-on-surface">
-									Order placed
-								</h3>
-								<p className="mt-2 text-sm text-on-surface-variant">
-									{orderSuccess.message}
+						</div>
+						
+						<div className="space-y-4">
+							<h3 className="font-serif text-4xl text-on-surface">
+								Thank You!
+							</h3>
+							<p className="text-on-surface-variant max-w-sm mx-auto leading-relaxed">
+								{orderSuccess.message} We&apos;ve sent a confirmation email with your order details.
+							</p>
+						</div>
+
+						{orderSuccess.orderNumber && (
+							<div className="bg-primary/5 rounded-3xl border border-primary/10 p-8 max-w-sm mx-auto">
+								<p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 mb-2">
+									Order Reference
 								</p>
-								{orderSuccess.orderNumber && (
-									<p className="mt-2 text-xs font-bold uppercase tracking-widest text-primary">
-										Order No: {orderSuccess.orderNumber}
-									</p>
-								)}
-								<Link
-									href="/category/all"
-									className="inline-flex mt-4 text-sm font-semibold text-primary"
-								>
-									Continue shopping
-								</Link>
+								<p className="text-2xl font-serif text-primary tracking-wide">
+									#{orderSuccess.orderNumber}
+								</p>
 							</div>
+						)}
+
+						<div className="pt-8">
+							<Link
+								href="/category/all"
+								className="inline-flex items-center justify-center bg-primary text-white h-16 px-12 rounded-full font-serif text-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+							>
+								Continue Shopping
+							</Link>
 						</div>
 					</motion.div>
+				) : (
+					<motion.form
+						key="form"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						className="space-y-stack-lg"
+						onSubmit={handleSubmit}
+					>
+						<div className="space-y-stack-md">
+							<h3 className="font-serif text-xl text-on-surface">
+								Contact Information
+							</h3>
+							<div className="grid grid-cols-2 gap-4">
+								<input
+									name="firstName"
+									value={form.firstName}
+									onChange={handleChange}
+									className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+									placeholder="First Name"
+								/>
+								<input
+									name="lastName"
+									value={form.lastName}
+									onChange={handleChange}
+									className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+									placeholder="Last Name"
+								/>
+							</div>
+							<input
+								name="email"
+								type="email"
+								value={form.email}
+								onChange={handleChange}
+								className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+								placeholder="Email Address"
+							/>
+							<input
+								name="phone"
+								value={form.phone}
+								onChange={handleChange}
+								className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+								placeholder="Phone Number"
+							/>
+
+							<div className="pt-4 space-y-4">
+								<label className="flex items-center gap-3 cursor-pointer group">
+									<div className="relative flex items-center justify-center w-5 h-5">
+										<input
+											type="checkbox"
+											name="createAccount"
+											checked={form.createAccount}
+											onChange={handleChange}
+											className="appearance-none w-5 h-5 border border-outline-variant rounded-md checked:bg-primary checked:border-primary transition-all cursor-pointer"
+										/>
+										{form.createAccount && (
+											<svg
+												className="absolute w-3 h-3 text-white pointer-events-none"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+												strokeWidth="4"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													d="M5 13l4 4L19 7"
+												/>
+											</svg>
+										)}
+									</div>
+									<span className="text-sm text-on-surface-variant group-hover:text-primary transition-colors">
+										Create an account for later?
+									</span>
+								</label>
+
+								<AnimatePresence>
+									{form.createAccount && (
+										<motion.div
+											initial={{ opacity: 0, height: 0 }}
+											animate={{ opacity: 1, height: "auto" }}
+											exit={{ opacity: 0, height: 0 }}
+											className="overflow-hidden"
+										>
+											<input
+												name="password"
+												type="password"
+												value={form.password}
+												onChange={handleChange}
+												className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+												placeholder="Create Password"
+											/>
+											<p className="mt-2 px-4 text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold">
+												Use at least 8 characters
+											</p>
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+						</div>
+
+						<div className="space-y-stack-md">
+							<h3 className="font-serif text-xl text-on-surface">
+								Shipping Address
+							</h3>
+							<input
+								name="street"
+								value={form.street}
+								onChange={handleChange}
+								className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
+								placeholder="Street Address"
+							/>
+							<div className="grid grid-cols-2 gap-4">
+								<input
+									name="city"
+									value={form.city}
+									onChange={handleChange}
+									className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
+									placeholder="City"
+								/>
+								<input
+									name="state"
+									value={form.state}
+									onChange={handleChange}
+									className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
+									placeholder="State / Province"
+								/>
+							</div>
+							<div className="grid grid-cols-2 gap-4">
+								<input
+									name="zipCode"
+									value={form.zipCode}
+									onChange={handleChange}
+									className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
+									placeholder="Postal Code"
+								/>
+								<div className="relative">
+									<select
+										name="country"
+										value={form.country}
+										onChange={handleChange}
+										className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm appearance-none focus:ring-1 focus:ring-primary focus:border-primary outline-none cursor-pointer"
+									>
+										<option value="Pakistan">Pakistan</option>
+										<option value="United Arab Emirates">
+											United Arab Emirates
+										</option>
+										<option value="Saudi Arabia">Saudi Arabia</option>
+										<option value="United Kingdom">United Kingdom</option>
+									</select>
+									<ChevronDown
+										className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant"
+										size={20}
+									/>
+								</div>
+							</div>
+						</div>
+
+						<div className="space-y-stack-md pt-stack-lg border-t border-outline-variant/30">
+							<h3 className="font-serif text-xl text-on-surface">Payment Method</h3>
+							<div className="rounded-2xl border border-outline-variant bg-white p-6 shadow-sm">
+								<div className="flex items-center justify-between gap-4">
+									<div>
+										<p className="text-sm font-bold uppercase tracking-widest text-primary">
+											Cash on Delivery (COD)
+										</p>
+										<p className="mt-2 text-sm text-on-surface-variant">
+											Pay when you receive your parcel.
+										</p>
+									</div>
+									<div className="rounded-full bg-primary/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-primary">
+										COD
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{errorMessage && (
+							<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+								{errorMessage}
+							</div>
+						)}
+
+						<button
+							type="submit"
+							disabled={isSubmitting || items.length === 0}
+							className="w-full bg-primary text-white h-16 rounded-full font-serif text-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all mt-stack-lg disabled:opacity-60 disabled:hover:scale-100"
+						>
+							{isSubmitting ? "Placing Order..." : "Confirm Order"}
+						</button>
+					</motion.form>
 				)}
 			</AnimatePresence>
-
-			<form className="space-y-stack-lg" onSubmit={handleSubmit}>
-				<div className="space-y-stack-md">
-					<h3 className="font-serif text-xl text-on-surface">
-						Contact Information
-					</h3>
-					<div className="grid grid-cols-2 gap-4">
-						<input
-							name="firstName"
-							value={form.firstName}
-							onChange={handleChange}
-							className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-							placeholder="First Name"
-						/>
-						<input
-							name="lastName"
-							value={form.lastName}
-							onChange={handleChange}
-							className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-							placeholder="Last Name"
-						/>
-					</div>
-					<input
-						name="email"
-						type="email"
-						value={form.email}
-						onChange={handleChange}
-						className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-						placeholder="Email Address"
-					/>
-					<input
-						name="phone"
-						value={form.phone}
-						onChange={handleChange}
-						className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-						placeholder="Phone Number"
-					/>
-
-					<div className="pt-4 space-y-4">
-						<label className="flex items-center gap-3 cursor-pointer group">
-							<div className="relative flex items-center justify-center w-5 h-5">
-								<input
-									type="checkbox"
-									name="createAccount"
-									checked={form.createAccount}
-									onChange={handleChange}
-									className="appearance-none w-5 h-5 border border-outline-variant rounded-md checked:bg-primary checked:border-primary transition-all cursor-pointer"
-								/>
-								{form.createAccount && (
-									<svg
-										className="absolute w-3 h-3 text-white pointer-events-none"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-										strokeWidth="4"
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
-								)}
-							</div>
-							<span className="text-sm text-on-surface-variant group-hover:text-primary transition-colors">
-								Create an account for later?
-							</span>
-						</label>
-
-						<AnimatePresence>
-							{form.createAccount && (
-								<motion.div
-									initial={{ opacity: 0, height: 0 }}
-									animate={{ opacity: 1, height: "auto" }}
-									exit={{ opacity: 0, height: 0 }}
-									className="overflow-hidden"
-								>
-									<input
-										name="password"
-										type="password"
-										value={form.password}
-										onChange={handleChange}
-										className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-										placeholder="Create Password"
-									/>
-									<p className="mt-2 px-4 text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold">
-										Use at least 8 characters
-									</p>
-								</motion.div>
-							)}
-						</AnimatePresence>
-					</div>
-				</div>
-
-				<div className="space-y-stack-md">
-					<h3 className="font-serif text-xl text-on-surface">
-						Shipping Address
-					</h3>
-					<input
-						name="street"
-						value={form.street}
-						onChange={handleChange}
-						className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
-						placeholder="Street Address"
-					/>
-					<div className="grid grid-cols-2 gap-4">
-						<input
-							name="city"
-							value={form.city}
-							onChange={handleChange}
-							className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
-							placeholder="City"
-						/>
-						<input
-							name="state"
-							value={form.state}
-							onChange={handleChange}
-							className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
-							placeholder="State / Province"
-						/>
-					</div>
-					<div className="grid grid-cols-2 gap-4">
-						<input
-							name="zipCode"
-							value={form.zipCode}
-							onChange={handleChange}
-							className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none"
-							placeholder="Postal Code"
-						/>
-						<div className="relative">
-							<select
-								name="country"
-								value={form.country}
-								onChange={handleChange}
-								className="w-full h-14 px-6 rounded-full border border-outline-variant bg-white text-sm appearance-none focus:ring-1 focus:ring-primary focus:border-primary outline-none cursor-pointer"
-							>
-								<option value="Pakistan">Pakistan</option>
-								<option value="United Arab Emirates">
-									United Arab Emirates
-								</option>
-								<option value="Saudi Arabia">Saudi Arabia</option>
-								<option value="United Kingdom">United Kingdom</option>
-							</select>
-							<ChevronDown
-								className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant"
-								size={20}
-							/>
-						</div>
-					</div>
-				</div>
-
-				<div className="space-y-stack-md pt-stack-lg border-t border-outline-variant/30">
-					<h3 className="font-serif text-xl text-on-surface">Payment Method</h3>
-					<div className="rounded-2xl border border-outline-variant bg-white p-6 shadow-sm">
-						<div className="flex items-center justify-between gap-4">
-							<div>
-								<p className="text-sm font-bold uppercase tracking-widest text-primary">
-									Cash on Delivery (COD)
-								</p>
-								<p className="mt-2 text-sm text-on-surface-variant">
-									Pay when you receive your parcel.
-								</p>
-							</div>
-							<div className="rounded-full bg-primary/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-primary">
-								COD
-							</div>
-						</div>
-					</div>
-				</div>
-
-				{errorMessage && (
-					<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-						{errorMessage}
-					</div>
-				)}
-
-				<button
-					type="submit"
-					disabled={isSubmitting || items.length === 0}
-					className="w-full bg-primary text-white h-16 rounded-full font-serif text-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all mt-stack-lg disabled:opacity-60 disabled:hover:scale-100"
-				>
-					{isSubmitting ? "Placing Order..." : "Confirm Order"}
-				</button>
-			</form>
 
 			<aside className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-outline-variant/30 p-margin-mobile z-40 shadow-2xl">
 				<div className="max-w-lg mx-auto">
