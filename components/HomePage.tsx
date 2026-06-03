@@ -15,30 +15,30 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { Product } from "@/app/types";
+import haircare from "../lib/assets/images/haircare.png";
+import fragrance from "../lib/assets/images/fragrance.png";
+import makeup from "../lib/assets/images/makeup.png";
+import skincare from "../lib/assets/images/skincare.png";
 
 const CATEGORIES = [
 	{
 		name: "Skincare",
-		image:
-			"https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=800&auto=format&fit=crop",
+		image: skincare,
 		color: "bg-[#E5D5D0]"
 	},
 	{
 		name: "Makeup",
-		image:
-			"https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop",
+		image: makeup,
 		color: "bg-[#D0D5E5]"
 	},
 	{
 		name: "Fragrance",
-		image:
-			"https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=800&auto=format&fit=crop",
+		image: fragrance,
 		color: "bg-[#E5E0D0]"
 	},
 	{
 		name: "Hair Care",
-		image:
-			"https://images.unsplash.com/photo-1527799822367-3188572f481b?q=80&w=800&auto=format&fit=crop",
+		image: haircare,
 		color: "bg-[#D0E5D5]"
 	}
 ];
