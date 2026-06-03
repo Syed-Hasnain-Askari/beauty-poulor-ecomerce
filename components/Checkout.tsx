@@ -24,6 +24,7 @@ const INITIAL_FORM: CheckoutForm = {
 
 export default function CheckoutPage() {
 	const { items, subtotal, clearCart, itemCount } = useCart();
+	console.log(items, "items");
 	const [form, setForm] = useState<CheckoutForm>(INITIAL_FORM);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
@@ -124,7 +125,8 @@ export default function CheckoutPage() {
 			items: items.map((item) => ({
 				product: item.id,
 				quantity: item.quantity,
-				price: item.price
+				price: item.price,
+				image: item.image
 			})),
 			total,
 			status: "pending",
@@ -147,7 +149,13 @@ export default function CheckoutPage() {
 			password: form.password
 		};
 
+		console.log(
+			"Submitting order with payload:",
+			JSON.stringify(payload, null, 2)
+		);
+
 		const response = await createOrder(payload);
+		console.log(payload);
 		setIsSubmitting(false);
 
 		if (!response?.success) {
@@ -192,7 +200,7 @@ export default function CheckoutPage() {
 					</div>
 				</div>
 			</section>
-
+			{/* Order placed Section */}
 			<AnimatePresence>
 				{orderSuccess && (
 					<motion.div
