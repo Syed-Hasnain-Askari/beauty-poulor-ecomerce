@@ -5,7 +5,7 @@ export interface Product {
 	description: string;
 	price: number;
 	category: Category; // Define proper category type
-	images: string[];
+	image: string[];
 	stock: number;
 	sku: string;
 	rating: number;

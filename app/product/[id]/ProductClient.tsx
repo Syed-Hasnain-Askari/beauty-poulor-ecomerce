@@ -47,7 +47,7 @@ export default function ProductClient({ product }: { product: Product }) {
 			id: product._id,
 			name: product.name,
 			price: product.price,
-			image: product.images[0],
+			image: product.image[0],
 			quantity,
 			categoryName: product.category?.name || "Beauty Essentials",
 			sku: product.sku,
@@ -66,7 +66,7 @@ export default function ProductClient({ product }: { product: Product }) {
 						<div className="flex-shrink-0 w-full aspect-square snap-start">
 							<Image
 								alt={`${product.name}`}
-								src={product?.images[0] || "/images/banner-image.jpg"}
+								src={product?.image[0] || "/image/banner-image.jpg"}
 								loading="eager"
 								width={600}
 								height={600}
@@ -75,7 +75,7 @@ export default function ProductClient({ product }: { product: Product }) {
 						</div>
 					</div>
 					<div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-						{product.images.map((_, idx) => (
+						{product.image.map((_, idx) => (
 							<span
 								key={idx}
 								className={`w-2 h-2 rounded-full ${

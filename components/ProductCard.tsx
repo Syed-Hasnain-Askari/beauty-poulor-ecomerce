@@ -19,7 +19,7 @@ export default function ProductCard({ products }: { products: Product }) {
 			id: products._id,
 			name: products.name,
 			price: products.price,
-			image: products.images?.[0] || "/images/banner-image.jpg",
+			image: products.image?.[0] || "/image/banner-image.jpg",
 			quantity: 1,
 			sku: products.sku,
 			stock: products.stock
@@ -43,7 +43,7 @@ export default function ProductCard({ products }: { products: Product }) {
 				>
 					<Image
 						alt={products?.name}
-						src={products?.images?.[0] || "/images/banner-image.jpg"}
+						src={products?.image?.[0] || "/image/banner-image.jpg"}
 						width={300}
 						height={400}
 						className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
